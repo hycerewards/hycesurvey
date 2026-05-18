@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Task</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#121a2c,#050816 60%,#020617);color:#fff;text-align:center;padding:20px;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(circle at 20% 20%,rgba(124,58,237,.16),transparent 28%),radial-gradient(circle at 80% 25%,rgba(74,222,128,.1),transparent 25%),radial-gradient(circle at 50% 85%,rgba(59,130,246,.11),transparent 26%);animation:bgFloat 12s ease-in-out infinite alternate;pointer-events:none}
+@keyframes bgFloat{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(16px,-10px,0) scale(1.02)}}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;position:relative;z-index:1;margin-bottom:14px}
+.back{padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#fff;text-decoration:none;font-size:13px}
+.badge{padding:8px 12px;border-radius:999px;background:rgba(124,58,237,.16);border:1px solid rgba(124,58,237,.28);font-size:12px;font-weight:700}
+.box{background:rgba(17,24,39,.76);padding:22px;border-radius:22px;margin-top:24px;border:1px solid rgba(124,58,237,.25);box-shadow:0 18px 36px rgba(0,0,0,.34),0 0 0 1px rgba(255,255,255,.04);backdrop-filter:blur(16px);position:relative;overflow:hidden;animation:fadeUp .65s ease}
+.box::after{content:"";position:absolute;inset:-35%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.08) 50%,transparent 65%);animation:shine 7s linear infinite;pointer-events:none}
+.title-chip{display:inline-block;margin-bottom:12px;padding:8px 12px;border-radius:999px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.2);font-size:12px;letter-spacing:.4px}
+#taskTitle{margin:8px 0 10px;font-size:1.7rem;position:relative;z-index:1}
+.subtitle{margin:0 auto 14px;max-width:520px;color:#cbd5e1;font-size:13px;line-height:1.55;position:relative;z-index:1}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 18px;position:relative;z-index:1}
+.info{padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.info b{display:block;font-size:15px;margin-bottom:4px}
+.info span{font-size:11px;color:#cbd5e1;opacity:.82}
+.steps{display:grid;gap:10px;text-align:left;position:relative;z-index:1}
+.step{padding:12px 13px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.step b{display:block;margin-bottom:4px}
+.step span{font-size:12px;color:#cbd5e1;line-height:1.5}
+.upload-area{margin:16px 0;padding:16px;border:2px dashed rgba(74,222,128,.4);border-radius:20px;background:rgba(34,197,94,.05);transition:.2s;position:relative;z-index:1}
+.upload-area:hover{border-color:#4ade80;background:rgba(34,197,94,.1)}
+#imageInput{display:none}
+.upload-label{display:inline-block;padding:10px 20px;background:linear-gradient(180deg,#3b82f6,#2563eb);border-radius:40px;cursor:pointer;font-size:14px;font-weight:600;margin-bottom:12px}
+.image-preview{max-width:100%;max-height:180px;border-radius:16px;margin-top:10px;border:1px solid rgba(255,255,255,.1)}
+.review-badge{display:inline-block;margin-top:10px;padding:6px 14px;border-radius:40px;background:#facc15;color:#000;font-weight:700;font-size:13px}
+.progress{height:10px;background:#1f2937;border-radius:999px;overflow:hidden;margin:16px 0 8px;position:relative;z-index:1}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#4ade80);transition:width .3s ease}
+.timer{margin-top:12px;font-size:18px;color:#facc15;font-weight:700;min-height:26px;position:relative;z-index:1}
+.status{margin-top:6px;font-size:13px;color:#cbd5e1;min-height:20px;position:relative;z-index:1}
+button{margin-top:15px;padding:13px 20px;border:none;border-radius:12px;font-size:16px;cursor:pointer;transition:.25s;font-weight:700;position:relative;z-index:1;box-shadow:0 10px 22px rgba(0,0,0,.18)}
+button:hover{transform:translateY(-1px) scale(1.02)}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.start-btn{background:linear-gradient(180deg,#8b5cf6,#6d28d9);color:white;width:100%}
+.upload-btn{background:linear-gradient(180deg,#22c55e,#16a34a);color:white;width:100%;margin-top:10px}
+.help-row{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:#cbd5e1;opacity:.9;position:relative;z-index:1}
+.link-btn{background:none;border:none;color:#4ade80;padding:0;font-size:12px;cursor:pointer;box-shadow:none}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);background:#111827;border:1px solid rgba(255,255,255,.08);padding:10px 16px;border-radius:12px;opacity:0;transition:.25s;z-index:2000;box-shadow:0 10px 24px rgba(0,0,0,.35);backdrop-filter:blur(10px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loader-screen{position:fixed;inset:0;background:#020617;display:none;justify-content:center;align-items:center;flex-direction:column;z-index:1500}
+.spinner{width:50px;height:50px;border:5px solid #1f2937;border-top:5px solid #7c3aed;border-radius:50%;animation:spin 1s linear infinite}
+.loader-screen p{margin-top:12px;color:#cbd5e1}
+.note{margin-top:16px;font-size:12px;color:#aab0c5;line-height:1.5}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes shine{0%{transform:translateX(-20%)}100%{transform:translateX(20%)}}
+@media(max-width:520px){.info-grid{grid-template-columns:1fr}.box{padding:18px}.subtitle{font-size:12px}.topbar{margin-bottom:10px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="dashboard.html">← Back</a>
+  <div class="badge">Task Session</div>
+</div>
+
+<div class="box">
+  <div class="title-chip">Complete the mission</div>
+  <h2 id="taskTitle">Task</h2>
+  <p class="subtitle" id="taskSubtitle">Open the task link, sign up/install, upload proof, then wait 60 seconds for review.</p>
+
+  <div class="info-grid">
+    <div class="info"><b id="pointsDisplay">0 Points</b><span>Per completed task</span></div>
+    <div class="info"><b>60 Sec</b><span>Review time</span></div>
+    <div class="info"><b>Image Proof</b><span>Required for reward</span></div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><b>Step 1</b><span>Tap start to open the task in a new tab.</span></div>
+    <div class="step"><b>Step 2</b><span>Complete the task and take a screenshot.</span></div>
+    <div class="step"><b>Step 3</b><span>Upload your screenshot, wait 60 seconds for review, then get points!</span></div>
+  </div>
+
+  <!-- Image Upload Section -->
+  <div class="upload-area">
+    <label class="upload-label" id="uploadLabel" style="cursor:pointer;">Upload Screenshot</label>
+    <input type="file" id="imageInput" accept="image/*">
+    <div id="previewContainer"></div>
+    <div id="reviewStatus"></div>
+  </div>
+
+  <!-- Upload & Submit Button -->
+  <button class="upload-btn" id="uploadBtn" onclick="uploadAndReview()" disabled>Upload and Submit</button>
+
+  <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="timer" id="timer"></div>
+  <div class="status" id="status">Ready when you are.</div>
+
+  <button class="start-btn" id="startBtn" onclick="startTask()">Start Task</button>
+
+  <div class="help-row">
+    <button class="link-btn" onclick="showHint()">Need help?</button>
+    <span id="taskHint">Open the linked page in a new tab</span>
+  </div>
+
+  <p class="note">Upload clear proof of completion. Points awarded after 60-second review. Max 40 points per task, 250 points per day.</p>
+</div>
+
+<div class="loader-screen" id="loader">
+  <div class="spinner"></div>
+  <p>Starting task...</p>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+// ========== GOOGLE SHEETS BACKEND ==========
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby7YLIBReAE-QdDkpMozA66sEqzwEgQVpH7OPY2UrCKKIsL4utnZ1agnOiAZSafDXwYIQ/exec';
+
+// ========== SUPPORT BOTH OLD + NEW LOGIN STORAGE ==========
+const currentUser =
+  localStorage.getItem('hyce_user') ||
+  localStorage.getItem('username');
+
+const currentPin =
+  localStorage.getItem('hyce_pin') ||
+  localStorage.getItem('password');
+
+if (!currentUser) {
+  alert('Please log in first.');
+  window.location.href = 'login.html';
+}
+
+// ========== SAFER API CALL FUNCTION ==========
+async function apiCall(action, params) {
+  try {
+    const response = await fetch(APP_SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8'
+      },
+      body: JSON.stringify({
+        action: action,
+        ...params
+      })
+    });
+
+    const text = await response.text();
+
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.log(text);
+      return {
+        success: false,
+        error: "Invalid server response"
+      };
+    }
+
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message
+    };
+  }
+}
+
+// ========== TASK DATA ==========
+let urlParams = new URLSearchParams(window.location.search);
+let taskId = parseInt(urlParams.get("id"));
+
+const taskList = [
+  "Grab Superapp", "Mystic Rewards", "Cash Galaxy", "Fortune Wheel",
+  "Reward Hunt", "Lucky Patcher", "Coin Master", "Spin Dynasty",
+  "Treasure Isle", "Bonus Blitz"
+];
+
+const taskLinks = [
+  "https://example.com/offer1", "https://example.com/offer2",
+  "https://example.com/offer3", "https://example.com/offer4",
+  "https://example.com/offer5", "https://example.com/offer6",
+  "https://example.com/offer7", "https://example.com/offer8",
+  "https://example.com/offer9", "https://example.com/offer10"
+];
+
+const taskPointsMap = {1:25,2:40,3:35,4:20,5:50,6:30,7:15,8:75,9:45,10:60};
+function getTaskPoints() {
+  let raw = taskPointsMap[taskId] || 25;
+  return Math.min(raw, 40);
+}
+let currentTaskPoints = getTaskPoints();
+
+// Cooldown (localStorage)
+let taskCooldowns = JSON.parse(localStorage.getItem('taskCooldowns')) || {};
+
+// UI elements
+document.getElementById("taskTitle").innerText = taskList[taskId-1];
+document.getElementById('taskHint').innerText = 'Task #' + taskId + ' selected';
+document.getElementById('pointsDisplay').innerHTML = currentTaskPoints + ' Points';
+
+let sessionStarted = false;
+let reviewTimer = null;
+let reviewSeconds = 60;
+let uploadedImageData = null;
+let isUnderReview = false;
+let completionLock = false;
+
+const statusEl = document.getElementById('status');
+const timerEl = document.getElementById('timer');
+const progressFill = document.getElementById('progressFill');
+const startBtn = document.getElementById('startBtn');
+const uploadBtn = document.getElementById('uploadBtn');
+const imageInput = document.getElementById('imageInput');
+const uploadLabel = document.getElementById('uploadLabel');
+const previewContainer = document.getElementById('previewContainer');
+const reviewStatusDiv = document.getElementById('reviewStatus');
+const loader = document.getElementById('loader');
+const toast = document.getElementById('toast');
+
+function showToast(msg, isErr=false){
+  toast.textContent=msg;
+  toast.style.borderColor = isErr ? '#ef4444' : '#4ade80';
+  toast.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>toast.classList.remove('show'),2500);
+}
+function setProgress(percent){progressFill.style.width = Math.min(percent,100) + '%';}
+function showHint(){showToast('Start task, complete it, upload screenshot, wait 60 seconds review, then get points');}
+
+function isTaskOnCooldown() {
+  let cooldownEnd = taskCooldowns[taskId];
+  return cooldownEnd && cooldownEnd > Date.now();
+}
+
+if (isTaskOnCooldown()) {
+  let cooldownEnd = taskCooldowns[taskId];
+  let remain = Math.ceil((cooldownEnd - Date.now())/1000);
+  let minutes = Math.floor(remain/60);
+  let seconds = remain%60;
+  statusEl.innerText = `Task on cooldown. Available in ${minutes}m ${seconds}s.`;
+  startBtn.disabled = true;
+  uploadBtn.disabled = true;
+  uploadLabel.style.opacity = "0.5";
+  imageInput.disabled = true;
+}
+
+uploadLabel.addEventListener('click', function(e) {
+  e.stopPropagation();
+  if (!sessionStarted) { showToast('Please start the task first'); return; }
+  if (isTaskOnCooldown()) { showToast('Task already completed (cooldown active)'); return; }
+  if (isUnderReview) { showToast('Task already under review'); return; }
+  imageInput.click();
+});
+
+imageInput.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      uploadedImageData = ev.target.result;
+      previewContainer.innerHTML = '<img src="' + uploadedImageData + '" class="image-preview" alt="Preview">';
+      if (sessionStarted && !isUnderReview && !isTaskOnCooldown()) {
+        uploadBtn.disabled = false;
+        statusEl.innerText = "Image ready! Click 'Upload and Submit' to start review.";
+      }
+    };
+    reader.readAsDataURL(file);
+  } else {
+    showToast("Please select a valid image file (JPG, PNG)", true);
+    imageInput.value = "";
+  }
+});
+
+// ========== 🔁 MODIFIED START TASK FUNCTION ==========
+function startTask() {
+  if (isTaskOnCooldown()) {
+    showToast('Task already completed (cooldown active)', true);
+    return;
+  }
+  let activeTask = localStorage.getItem("activeTaskId");
+  if (parseInt(activeTask) !== taskId && activeTask !== null) {
+    showToast('Another task already in progress', true);
+    return;
+  }
+  if (sessionStarted) return;
+  
+  localStorage.setItem("activeTaskId", taskId);
+  sessionStarted = true;
+  loader.style.display = 'flex';
+  
+  setTimeout(()=>{
+    loader.style.display='none';
+    // 🔁 REDIRECT TO TASK PANEL INSTEAD OF OPENING NEW TAB
+    window.location.href = 'taskpanel.html?id=' + taskId;
+    // NOTE: statusEl and startBtn disabled will be preserved because page unloads
+  }, 900);
+}
+
+async function uploadAndReview() {
+  if (!sessionStarted) { showToast('Please start the task first', true); return; }
+  if (isTaskOnCooldown()) { showToast('Task already completed (cooldown active)', true); return; }
+  if (!uploadedImageData) { showToast('Please select an image first', true); return; }
+  if (isUnderReview) { showToast('Already under review! Wait 60 seconds.', true); return; }
+  if (completionLock) return;
+  
+  localStorage.setItem("task_image_" + taskId, uploadedImageData);
+  
+  isUnderReview = true;
+  uploadBtn.disabled = true;
+  uploadBtn.style.opacity = "0.6";
+  reviewSeconds = 60;
+  
+  reviewStatusDiv.innerHTML = '<div class="review-badge">⏳ IN REVIEW</div>';
+  statusEl.innerText = "Image submitted. Review in progress...";
+  
+  reviewTimer = setInterval(() => {
+    timerEl.innerText = "Review: " + reviewSeconds + " seconds remaining...";
+    setProgress(((60 - reviewSeconds) / 60) * 100);
+    reviewSeconds--;
+    
+    if (reviewSeconds < 0) {
+      clearInterval(reviewTimer);
+      timerEl.innerText = "✅ Review complete!";
+      setProgress(100);
+      awardPointsViaAPI();
+    }
+  }, 1000);
+}
+
+async function awardPointsViaAPI() {
+  if (completionLock) return;
+  completionLock = true;
+  
+  try {
+    const result = await apiCall('addPoints', {
+      username: currentUser,
+      taskId: taskId,
+      points: currentTaskPoints
+    });
+    
+    if (result.success) {
+      // Start 24-hour cooldown
+      let cooldownEnd = Date.now() + (24 * 60 * 60 * 1000);
+      taskCooldowns[taskId] = cooldownEnd;
+      localStorage.setItem('taskCooldowns', JSON.stringify(taskCooldowns));
+      localStorage.removeItem("activeTaskId");
+      
+      localStorage.setItem("justCompletedTask", JSON.stringify({
+        id: taskId,
+        points: currentTaskPoints,
+        name: taskList[taskId-1]
+      }));
+      
+      reviewStatusDiv.innerHTML = '<div class="review-badge" style="background:#22c55e; color:white;">✅ POINTS AWARDED!</div>';
+      statusEl.innerText = `+${result.pointsAdded} points awarded! Redirecting...`;
+      showToast(`Success! +${result.pointsAdded} points. New total: ${result.newTotal}`);
+      
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 2000);
+    } else {
+      reviewStatusDiv.innerHTML = '<div class="review-badge" style="background:#ef4444;">❌ ' + (result.error || result.message) + '</div>';
+      statusEl.innerText = result.error || result.message || "Failed to award points";
+      showToast(result.error || "Unknown error", true);
+      uploadBtn.disabled = true;
+      completionLock = false;
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Network error. Please try again later.', true);
+    reviewStatusDiv.innerHTML = '<div class="review-badge" style="background:#ef4444;">❌ Error</div>';
+    statusEl.innerText = 'Error connecting to server. Refresh and try again.';
+    completionLock = false;
+  }
+  isUnderReview = false;
+}
+</script>
+</body>
+</html>

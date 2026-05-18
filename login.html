@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HYCE Login</title>
+<link rel="stylesheet" href="style.css">
+<style>
+/* ========== YOUR ORIGINAL CSS (unchanged) ========== */
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden;background:radial-gradient(circle at top,#1f2a44 0%,#0b0f1a 38%,#050816 100%)}
+body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(circle at 20% 20%,rgba(124,58,237,.18),transparent 28%),radial-gradient(circle at 80% 30%,rgba(74,222,128,.12),transparent 24%),radial-gradient(circle at 50% 85%,rgba(59,130,246,.14),transparent 26%);animation:bgFloat 12s ease-in-out infinite alternate;pointer-events:none}
+@keyframes bgFloat{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(18px,-12px,0) scale(1.02)}}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+.auth-container{width:100%;max-width:360px;position:relative;overflow:hidden;text-align:center;padding:24px 20px 18px;background:rgba(17,24,39,.72);border:1px solid rgba(255,255,255,.08);border-radius:22px;backdrop-filter:blur(18px);box-shadow:0 18px 40px rgba(0,0,0,.38),0 0 0 1px rgba(124,58,237,.12);transform-style:preserve-3d;animation:fadeUp .7s ease}
+.auth-container::before{content:"";position:absolute;inset:-40%;background:linear-gradient(120deg,transparent 35%,rgba(255,255,255,.08) 50%,transparent 65%);animation:shine 7s linear infinite;pointer-events:none}
+.auth-container:hover{transform:translateY(-2px)}
+.brand{display:inline-flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;border-radius:999px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.28);font-size:12px;font-weight:700;letter-spacing:.4px;position:relative;z-index:1}
+.brand-dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(180deg,#8b5cf6,#22c55e);box-shadow:0 0 12px rgba(139,92,246,.7)}
+.auth-container h2{margin:8px 0 8px;font-size:1.8rem;position:relative;z-index:1}
+.subtext{margin:0 0 16px;color:#c8cbd7;font-size:13px;line-height:1.5;position:relative;z-index:1}
+.live-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:12px;opacity:.95;margin-bottom:14px;position:relative;z-index:1}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 10px rgba(74,222,128,.8)}
+.field{position:relative;margin:10px 0}
+.auth-container input{width:100%;padding:13px 44px 13px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);color:#fff;outline:none;transition:.25s;position:relative;z-index:1}
+.auth-container input::placeholder{color:rgba(255,255,255,.55)}
+.auth-container input:focus{border-color:rgba(124,58,237,.55);box-shadow:0 0 0 3px rgba(124,58,237,.14)}
+.toggle-pass{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#cfd3e6;cursor:pointer;font-size:12px;padding:6px 4px;z-index:2}
+.error{color:#ff7b7b;min-height:22px;margin:8px 0 4px;font-size:13px;position:relative;z-index:1}
+.btn{width:100%;padding:13px 14px;margin:10px 0;border-radius:12px;border:none;background:linear-gradient(180deg,#8b5cf6,#6d28d9);color:#fff;cursor:pointer;font-size:15px;font-weight:700;transition:.25s;box-shadow:0 10px 24px rgba(124,58,237,.28)}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.75;cursor:not-allowed;transform:none}
+.btn.outline{background:transparent;border:1px solid rgba(139,92,246,.8);box-shadow:none}
+.remember-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 6px;font-size:12px;color:#c8cbd7;position:relative;z-index:1}
+.remember{display:flex;align-items:center;gap:8px}
+.remember input{width:auto;margin:0}
+.link{font-size:12px;opacity:.78;cursor:pointer;margin-top:6px;position:relative;z-index:1}
+.link:hover{opacity:1;text-decoration:underline}
+.footer-note{margin-top:14px;font-size:11px;line-height:1.45;color:#aab0c5;opacity:.9;position:relative;z-index:1}
+.loading{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes shine{0%{transform:translateX(-20%) rotate(0deg)}100%{transform:translateX(20%) rotate(360deg)}}
+@media (max-width:420px){.wrap{padding:18px}.auth-container{padding:22px 16px 16px;border-radius:20px}.auth-container h2{font-size:1.55rem}.subtext{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="auth-container">
+    <div class="brand"><span class="brand-dot"></span>HYCE Elite Access</div>
+    <h2>Welcome Back</h2>
+    <p class="subtext">Secure sign-in for your dashboard, rewards, and account access.</p>
+    <div class="live-pill"><span class="live-dot"></span>Protected session • Demo access</div>
+
+    <div class="field">
+      <input type="text" id="username" placeholder="Username" autocomplete="username">
+    </div>
+
+    <div class="field">
+      <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+      <button class="toggle-pass" type="button" onclick="togglePassword()" id="toggleBtn">Show</button>
+    </div>
+
+    <div class="remember-row">
+      <label class="remember"><input type="checkbox" id="rememberMe"> Remember me</label>
+      <span class="link" onclick="forgotPassword()">Forgot Password?</span>
+    </div>
+
+    <p id="error" class="error"></p>
+
+    <button class="btn" id="loginBtn" onclick="login()">Login</button>
+    <button class="btn outline" id="signupBtn" onclick="signup()">Sign Up</button>
+
+    <div class="footer-note">By continuing, you agree to use HYCE responsibly. Demo balances and rewards shown are for illustration only.</div>
+  </div>
+</div>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycby7YLIBReAE-QdDkpMozA66sEqzwEgQVpH7OPY2UrCKKIsL4utnZ1agnOiAZSafDXwYIQ/exec";
+const usernameEl = document.getElementById('username');
+const passwordEl = document.getElementById('password');
+const errorEl = document.getElementById('error');
+const loginBtn = document.getElementById('loginBtn');
+const signupBtn = document.getElementById('signupBtn');
+const rememberMe = document.getElementById('rememberMe');
+
+if(localStorage.getItem('hyceRememberedUsername')){
+  usernameEl.value = localStorage.getItem('hyceRememberedUsername');
+  rememberMe.checked = true;
+}
+
+function setLoading(btn, text){
+  btn.disabled = true;
+  btn.dataset.text = btn.innerHTML;
+  btn.innerHTML = '<span class="loading"></span>' + text;
+}
+function clearLoading(btn){
+  btn.disabled = false;
+  if(btn.dataset.text) btn.innerHTML = btn.dataset.text;
+}
+function togglePassword(){
+  const visible = passwordEl.type === 'text';
+  passwordEl.type = visible ? 'password' : 'text';
+  document.getElementById('toggleBtn').innerText = visible ? 'Show' : 'Hide';
+}
+
+// LOGIN FUNCTION – FIXED to set correct localStorage keys and redirect properly
+async function login() {
+  let username = usernameEl.value.trim();
+  let password = passwordEl.value.trim();
+  let error = errorEl;
+
+  if (!username || !password) {
+    error.innerText = "Please fill all fields";
+    return;
+  }
+
+  error.innerText = "Checking...";
+  setLoading(loginBtn, 'Logging in...');
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "login",
+        username: username,
+        password: password
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+      // Set both old and new localStorage keys for compatibility
+      localStorage.setItem("username", username);
+      localStorage.setItem("hyce_user", username);
+      localStorage.setItem("hyce_pin", password);   // store password as PIN
+      if (rememberMe.checked) {
+        localStorage.setItem('hyceRememberedUsername', username);
+      } else {
+        localStorage.removeItem('hyceRememberedUsername');
+      }
+      // Redirect to dashboard
+      window.location.href = "dashboard.html";
+    } else {
+      error.innerText = "Invalid username or password";
+    }
+
+  } catch (err) {
+    error.innerText = "Connection error: " + err.message;
+    console.error(err);
+  } finally {
+    clearLoading(loginBtn);
+  }
+}
+
+// SIGNUP FUNCTION – fixed to show clearer messages (uses your old backend)
+async function signup() {
+  let username = usernameEl.value.trim();
+  let password = passwordEl.value.trim();
+  let error = errorEl;
+
+  if (!username || !password) {
+    error.innerText = "Please fill all fields";
+    return;
+  }
+
+  error.innerText = "Creating account...";
+  setLoading(signupBtn, 'Creating...');
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "signup",
+        username: username,
+        password: password
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.status === "exists") {
+      error.innerText = "Username already taken";
+    } else if (data.status === "success") {
+      error.innerText = "Account created! You can now log in.";
+      if (rememberMe.checked) {
+        localStorage.setItem('hyceRememberedUsername', username);
+      }
+      // Optional: auto-login after signup? We'll keep manual login.
+    } else {
+      error.innerText = "Something went wrong";
+    }
+
+  } catch (err) {
+    error.innerText = "Error creating account: " + err.message;
+    console.error(err);
+  } finally {
+    clearLoading(signupBtn);
+  }
+}
+
+// FORGOT PASSWORD
+function forgotPassword(){
+  alert("Contact admin to reset your password.");
+}
+</script>
+</body>
+</html>

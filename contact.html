@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#121a2c,#050816 60%,#020617);color:#fff;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(circle at 15% 20%,rgba(124,58,237,.16),transparent 28%),radial-gradient(circle at 80% 25%,rgba(74,222,128,.1),transparent 25%),radial-gradient(circle at 50% 85%,rgba(59,130,246,.11),transparent 26%);animation:bgFloat 12s ease-in-out infinite alternate;pointer-events:none}
+@keyframes bgFloat{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(16px,-10px,0) scale(1.02)}}
+.back-bar{padding:12px 18px 0;position:relative;z-index:1}
+.back-btn{display:inline-block;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:8px 16px;border-radius:40px;color:#4ade80;text-decoration:none;font-size:13px;transition:.2s}
+.back-btn:hover{background:rgba(74,222,128,.15);border-color:#4ade80}
+.header{padding:8px 18px 8px;font-size:18px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.header-chip{padding:8px 12px;border-radius:999px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.22);font-size:12px;color:#d1fae5}
+.hero{margin:12px 15px 0;padding:22px 18px;border-radius:24px;background:rgba(17,24,39,.76);border:1px solid rgba(124,58,237,.25);box-shadow:0 18px 36px rgba(0,0,0,.34);backdrop-filter:blur(16px);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle,rgba(124,58,237,.2),transparent 40%),radial-gradient(circle at 80% 20%,rgba(74,222,128,.12),transparent 30%);animation:slowGlow 10s ease-in-out infinite alternate;pointer-events:none}
+.hero h1{margin:0 0 8px;font-size:2rem;position:relative;z-index:1}
+.hero p{margin:0;color:#cbd5e1;line-height:1.6;position:relative;z-index:1}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px}
+.stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;backdrop-filter:blur(8px)}
+.stat b{display:block;font-size:16px;margin-bottom:4px}
+.stat span{font-size:11px;color:#cbd5e1;opacity:.8}
+.card{background:rgba(17,24,39,.78);margin:15px;border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,.06);box-shadow:0 14px 30px rgba(0,0,0,.24);backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.card::after{content:"";position:absolute;inset:-35%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.08) 50%,transparent 65%);animation:shine 7s linear infinite;pointer-events:none}
+.card h3{margin:0 0 12px;font-size:15px;position:relative;z-index:1}
+label{display:block;font-size:12px;color:#cbd5e1;opacity:.85;margin-top:10px;margin-bottom:6px;position:relative;z-index:1}
+input,select,textarea{width:100%;padding:12px 13px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:rgba(31,41,55,.95);color:#fff;outline:none;transition:.25s;position:relative;z-index:1}
+input:focus,select:focus,textarea:focus{border-color:rgba(124,58,237,.6);box-shadow:0 0 0 3px rgba(124,58,237,.14)}
+textarea{min-height:120px;resize:vertical}
+button{width:100%;padding:14px;margin-top:15px;border:none;border-radius:12px;background:linear-gradient(180deg,#8b5cf6,#6d28d9);color:white;font-size:16px;font-weight:700;cursor:pointer;transition:.25s;box-shadow:0 10px 24px rgba(124,58,237,.28)}
+button:hover{transform:translateY(-1px)}
+.pills{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;position:relative;z-index:1}
+.pill{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:12px}
+.note{margin:15px;color:#aab0c5;font-size:12px;line-height:1.5}
+.contact-list{display:grid;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;padding:12px 13px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.row span{font-size:12px;color:#cbd5e1}
+.row a{color:#4ade80;text-decoration:none;font-weight:bold}
+.row a:hover{text-decoration:underline}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);background:#111827;border:1px solid rgba(255,255,255,.08);padding:10px 16px;border-radius:12px;opacity:0;transition:.25s;z-index:2000;box-shadow:0 10px 24px rgba(0,0,0,.35);backdrop-filter:blur(10px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@keyframes slowGlow{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(18px,-10px,0)}}
+@keyframes shine{0%{transform:translateX(-20%)}100%{transform:translateX(20%)}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<!-- BACK BUTTON -->
+<div class="back-bar">
+  <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+</div>
+
+<div class="header"><span>Contact Us</span><span class="header-chip">We’re here to help</span></div>
+<div class="hero">
+  <h1>Need support?</h1>
+  <p>Send a message, choose a topic, or use the quick contact options below.</p>
+</div>
+<div class="grid">
+  <div class="stat"><b>Live</b><span>Fast response</span></div>
+  <div class="stat"><b>24/7</b><span>Availability</span></div>
+  <div class="stat"><b>Simple</b><span>One form</span></div>
+</div>
+<div class="card">
+  <h3>Quick Contacts</h3>
+  <div class="contact-list">
+    <div class="row"><span>Email</span><strong>support@hyce.app</strong></div>
+    <div class="row"><span>Telegram</span><strong><a href="https://t.me/AdmiJohanna" target="_blank">@AdmiJohanna</a></strong></div>
+    <div class="row"><span>Phone</span><strong>+234 000 000 0000</strong></div>
+  </div>
+</div>
+<div class="card">
+  <h3>Send a Message</h3>
+  <label>Topic</label>
+  <select id="topic">
+    <option>General Inquiry</option>
+    <option>Withdrawals</option>
+    <option>Login Issue</option>
+    <option>Referral Support</option>
+    <option>Task Problem</option>
+  </select>
+  <label>Your Name</label>
+  <input type="text" id="name" placeholder="Enter your name">
+  <label>Message</label>
+  <textarea id="message" placeholder="Tell us what you need help with..."></textarea>
+  <button onclick="sendMessage()">Send Message</button>
+</div>
+<div class="card">
+  <h3>What to include</h3>
+  <div class="pills">
+    <div class="pill">Username</div>
+    <div class="pill">Issue type</div>
+    <div class="pill">Screenshot</div>
+    <div class="pill">Time of issue</div>
+  </div>
+</div>
+<p class="note">Tip: keep your contact form short and visible near the top, and always offer alternate ways to reach you.</p>
+<div id="toast" class="toast"></div>
+<script>
+function toast(msg){let t=document.getElementById('toast');t.innerText=msg;t.classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.classList.remove('show'),2200)}
+function sendMessage(){const topic=document.getElementById('topic').value;const name=document.getElementById('name').value.trim();const message=document.getElementById('message').value.trim();if(!name||!message) return toast('Please fill name and message');toast('Message sent: '+topic)}
+</script>
+</body>
+</html>

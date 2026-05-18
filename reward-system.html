@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reward Store - HYCE Elite</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0f172a,#020617);color:#fff;min-height:100vh}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.back-btn{display:inline-block;margin-bottom:20px;color:#4ade80;text-decoration:none;font-size:14px}
+.back-btn:hover{color:#22c55e}
+.header{text-align:center;margin-bottom:30px}
+.header h1{font-size:28px;background:linear-gradient(135deg,#facc15,#4ade80);-webkit-background-clip:text;background-clip:text;color:transparent}
+.header p{color:#94a3b8;margin-top:8px}
+.points-card{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:24px;padding:25px;text-align:center;margin-bottom:30px;border:1px solid rgba(139,92,246,.3)}
+.points-label{font-size:14px;color:#94a3b8;letter-spacing:1px}
+.points-amount{font-size:64px;font-weight:bold;color:#facc15;margin:10px 0}
+.section-title{font-size:22px;margin:30px 0 20px;text-align:center}
+.reward-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;margin-bottom:40px}
+.reward-card{background:linear-gradient(135deg,rgba(17,24,39,.8),rgba(2,6,23,.9));border-radius:20px;padding:22px;border:1px solid rgba(139,92,246,.3);transition:transform .2s,box-shadow .2s;text-align:center}
+.reward-card:hover{transform:translateY(-4px);box-shadow:0 20px 30px -12px rgba(0,0,0,.5);border-color:#7c3aed}
+.reward-name{font-size:20px;font-weight:bold;margin-bottom:8px}
+.reward-desc{font-size:12px;color:#94a3b8;margin-bottom:15px}
+.reward-points{font-size:28px;font-weight:bold;color:#facc15;margin:15px 0}
+.reward-cash{font-size:22px;font-weight:bold;color:#4ade80;margin-bottom:15px}
+.reward-btn{background:linear-gradient(90deg,#f59e0b,#d97706);border:none;padding:12px 24px;border-radius:40px;color:#fff;font-weight:bold;font-size:16px;cursor:pointer;width:100%;transition:.2s}
+.reward-btn:hover:not(:disabled){transform:scale(1.02);box-shadow:0 8px 20px rgba(245,158,11,.3)}
+.reward-btn:disabled{opacity:0.4;cursor:not-allowed}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(17,24,39,.95);border:1px solid #4ade80;padding:12px 24px;border-radius:12px;opacity:0;transition:.3s;z-index:1000;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{border-color:#ef4444}
+.footer-note{text-align:center;font-size:12px;color:#475569;margin-top:30px;padding-top:20px;border-top:1px solid rgba(255,255,255,.05)}
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+  
+  <div class="header">
+    <h1>🏆 Reward Store</h1>
+    <p>Redeem your hard-earned points for real cash</p>
+  </div>
+  
+  <div class="points-card">
+    <div class="points-label">Your Balance</div>
+    <div class="points-amount" id="pointsAmount">0</div>
+    <div class="points-label">points available</div>
+  </div>
+  
+  <div class="section-title">💰 Cash Rewards</div>
+  <div class="reward-grid" id="rewardGrid"></div>
+  
+  <div class="footer-note">
+    ⚡ Redemptions are processed instantly. Points deducted upon successful redemption.
+  </div>
+</div>
+<div class="toast" id="toast">Message</div>
+
+<script>
+// ========== EXACTLY 10 REWARD OPTIONS ==========
+const rewards = [
+  { id: 1, name: "Starter Cash", points: 10000, cash: 15, desc: "Best for beginners" },
+  { id: 2, name: "Silver Pack", points: 20000, cash: 40, desc: "Popular choice" },
+  { id: 3, name: "Gold Pack", points: 25000, cash: 50, desc: "Great value" },
+  { id: 4, name: "Platinum Pack", points: 30000, cash: 65, desc: "Hot deal" },
+  { id: 5, name: "Ruby Pack", points: 40000, cash: 90, desc: "Big saver" },
+  { id: 6, name: "Sapphire Pack", points: 50000, cash: 115, desc: "Premium" },
+  { id: 7, name: "Emerald Pack", points: 60000, cash: 140, desc: "VIP choice" },
+  { id: 8, name: "Diamond Pack", points: 75000, cash: 180, desc: "Elite" },
+  { id: 9, name: "Master Pack", points: 90000, cash: 220, desc: "Ultimate" },
+  { id: 10, name: "Legend Pack", points: 100000, cash: 250, desc: "Maximum reward" }
+];
+
+// ========== USER DATA ==========
+let userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+let redeemedRewards = JSON.parse(localStorage.getItem('redeemedRewardsStore')) || [];
+let pointsLedger = JSON.parse(localStorage.getItem('pointsLedger')) || [];
+
+// Helper: Show toast message
+function showToast(msg, isError = false) {
+  let toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.remove('error');
+  if (isError) toast.classList.add('error');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Update UI with current points
+function updateUI() {
+  document.getElementById('pointsAmount').innerText = userPoints;
+  // Also sync to localStorage
+  localStorage.setItem('userPoints', userPoints);
+}
+
+// Log transaction to ledger
+function logTransaction(rewardId, pointsSpent, cashEarned) {
+  pointsLedger.push({
+    type: 'redemption',
+    rewardId: rewardId,
+    pointsSpent: pointsSpent,
+    cashEarned: cashEarned,
+    timestamp: new Date().toISOString(),
+    date: new Date().toLocaleString()
+  });
+  localStorage.setItem('pointsLedger', JSON.stringify(pointsLedger));
+}
+
+// Redeem reward
+function redeemReward(rewardId) {
+  const reward = rewards.find(r => r.id === rewardId);
+  if (!reward) return;
+  
+  // Check if already redeemed
+  if (redeemedRewards.includes(rewardId)) {
+    showToast(`❌ You already redeemed ${reward.name}!`, true);
+    return;
+  }
+  
+  // Check if user has enough points
+  if (userPoints < reward.points) {
+    showToast(`❌ Need ${reward.points.toLocaleString()} points. You have ${userPoints.toLocaleString()}.`, true);
+    return;
+  }
+  
+  // Confirm with user (optional but good UX)
+  let confirmMsg = `Redeem ${reward.points.toLocaleString()} points for $${reward.cash}?`;
+  if (!confirm(confirmMsg)) return;
+  
+  // Deduct points
+  userPoints -= reward.points;
+  
+  // Add to redeemed list
+  redeemedRewards.push(rewardId);
+  
+  // Add cash to user's balance (using same 'balance' key from dashboard)
+  let currentBalance = parseFloat(localStorage.getItem('balance')) || 0;
+  let newBalance = currentBalance + reward.cash;
+  localStorage.setItem('balance', newBalance);
+  
+  // Log transaction for accuracy
+  logTransaction(rewardId, reward.points, reward.cash);
+  
+  // Save everything
+  localStorage.setItem('userPoints', userPoints);
+  localStorage.setItem('redeemedRewardsStore', JSON.stringify(redeemedRewards));
+  
+  // Update UI
+  updateUI();
+  renderRewardGrid();
+  
+  // Show success message
+  showToast(`✅ Redeemed ${reward.name}! $${reward.cash} added to your balance.`);
+}
+
+// Render all 10 reward cards
+function renderRewardGrid() {
+  const grid = document.getElementById('rewardGrid');
+  if (!grid) return;
+  
+  grid.innerHTML = '';
+  
+  rewards.forEach(reward => {
+    const isRedeemed = redeemedRewards.includes(reward.id);
+    const canAfford = userPoints >= reward.points;
+    
+    const card = document.createElement('div');
+    card.className = 'reward-card';
+    card.innerHTML = `
+      <div class="reward-name">${reward.name}</div>
+      <div class="reward-desc">${reward.desc}</div>
+      <div class="reward-points">⭐ ${reward.points.toLocaleString()} points</div>
+      <div class="reward-cash">💰 $${reward.cash} USD</div>
+      <button class="reward-btn" data-id="${reward.id}" ${isRedeemed || !canAfford ? 'disabled' : ''}>
+        ${isRedeemed ? '✓ Already Redeemed' : (canAfford ? 'Redeem Now →' : `Need ${(reward.points - userPoints).toLocaleString()} more pts`)}
+      </button>
+    `;
+    
+    // Attach event listener
+    const btn = card.querySelector('.reward-btn');
+    if (btn && !isRedeemed && canAfford) {
+      btn.addEventListener('click', () => redeemReward(reward.id));
+    }
+    
+    grid.appendChild(card);
+  });
+}
+
+// Check daily reset for points (sync with task page logic)
+function syncDailyReset() {
+  let lastResetDate = localStorage.getItem('lastResetDate');
+  let today = new Date().toDateString();
+  if (lastResetDate !== today) {
+    localStorage.setItem('todayPoints', '0');
+    localStorage.setItem('lastResetDate', today);
+  }
+  // Also sync userPoints from any possible updates elsewhere
+  let freshPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+  if (freshPoints !== userPoints) {
+    userPoints = freshPoints;
+    updateUI();
+  }
+}
+
+// Initialize page
+function init() {
+  syncDailyReset();
+  updateUI();
+  renderRewardGrid();
+}
+
+// Run on load
+init();
+
+// Optional: refresh points every 2 seconds (in case dashboard updates them)
+setInterval(() => {
+  let freshPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+  if (freshPoints !== userPoints) {
+    userPoints = freshPoints;
+    updateUI();
+    renderRewardGrid();
+  }
+}, 2000);
+</script>
+</body>
+</html>

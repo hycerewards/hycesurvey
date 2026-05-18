@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>HYCE - NFT & Trading Platform</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#0b0b0f;color:#fff;-webkit-tap-highlight-color:transparent;scroll-behavior:smooth;overflow-x:hidden}
+.purple{color:#8b5cf6}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:rgba(0,0,0,.35);backdrop-filter:blur(12px);position:absolute;top:0;left:0;right:0;width:100%;z-index:1000}
+.logo{color:#fff;font-weight:800;font-size:1.4rem;letter-spacing:1px;text-shadow:0 4px 16px rgba(0,0,0,.35)}
+.btn,.start-btn,.discover-btn,.challenge button{background:rgba(255,255,255,.16);padding:8px 18px;border-radius:30px;border:1px solid rgba(255,255,255,.22);color:#fff;font-weight:700;cursor:pointer;transition:.25s;backdrop-filter:blur(10px);box-shadow:0 0 8px rgba(0,0,0,.18)}
+.btn:active,.start-btn:active,.challenge button:active,.ftmo-card:active,.plus:active,.stat:active,.faq-question:active{transform:scale(.96)}
+.hero-banner{position:relative;min-height:100vh;background:url('https://i.postimg.cc/9Qv01JqV/IMG-3623.png') center center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding:120px 20px 30px;overflow:hidden;perspective:1200px}
+.hero-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(to top, rgba(5,10,25,.92) 0%, rgba(5,10,25,.5) 45%, rgba(5,10,25,.18) 100%)}
+.hero-banner::after{content:'';position:absolute;inset:-20%;background:radial-gradient(circle at 50% 30%, rgba(99,102,241,.18), transparent 35%), radial-gradient(circle at 80% 70%, rgba(59,130,246,.18), transparent 28%);animation:drift 12s ease-in-out infinite alternate;pointer-events:none}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(18px,-12px,0) scale(1.03)}}
+.hero-overlay{position:relative;z-index:2;width:100%;max-width:760px;text-align:center;color:#fff;transform-style:preserve-3d;animation:floatHero 6s ease-in-out infinite}
+@keyframes floatHero{0%,100%{transform:translateY(0) rotateX(0deg)}50%{transform:translateY(-8px) rotateX(2deg)}}
+.hero-logo{font-size:2rem;font-weight:800;letter-spacing:1px;margin-bottom:28px;text-shadow:0 4px 16px rgba(0,0,0,.4)}
+.challenge-pill{display:inline-block;padding:14px 28px;border-radius:999px;background:linear-gradient(180deg, rgba(70,130,255,.95), rgba(34,92,220,.95));color:#fff;font-weight:700;font-size:1.2rem;box-shadow:0 12px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.25);margin-bottom:22px;backdrop-filter:blur(10px);transform:translateZ(30px)}
+.hero-overlay h1{font-size:clamp(2.5rem,7vw,4.6rem);line-height:.95;font-weight:900;margin:0 auto 28px;max-width:680px;text-shadow:0 6px 20px rgba(0,0,0,.45);transform:translateZ(22px)}
+.discover-btn{border:none;background:linear-gradient(180deg,#5f8ff7,#3c74ef);font-size:1.1rem;letter-spacing:.5px;padding:18px 34px;border-radius:18px;box-shadow:0 14px 30px rgba(0,0,0,.28),0 0 25px rgba(76,122,255,.35);margin-bottom:24px;transform:translateZ(26px)}
+.discover-btn:hover,.btn:hover,.challenge button:hover{transform:translateY(-2px) scale(1.01)}
+.hero-note{font-size:.7rem;line-height:1.5;opacity:.82;max-width:700px;margin:0 auto;text-transform:uppercase;letter-spacing:.3px;transform:translateZ(18px)}
+.trustpilot{display:inline-flex;align-items:center;gap:10px;justify-content:center;margin:0 auto 18px;padding:10px 16px;border-radius:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(10px);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.trustpilot .stars{color:#00b67a;letter-spacing:2px;font-size:1.05rem;font-weight:900}
+.trustpilot .tp-text{font-size:.92rem;font-weight:700}
+.trustpilot .tp-sub{font-size:.8rem;opacity:.82}
+.ftmo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;padding:20px}
+.ftmo-card{position:relative;border-radius:24px;height:240px;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;transform-style:preserve-3d}
+.ftmo-card:hover{transform:translateY(-6px) rotateX(4deg) rotateY(-4deg);box-shadow:0 18px 30px rgba(0,0,0,.28)}
+.ftmo-card img{position:absolute;width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.ftmo-card:hover img{transform:scale(1.06)}
+.ftmo-card::after{content:'';position:absolute;width:100%;height:100%;background:linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.2));pointer-events:none}
+.ftmo-card .content{position:relative;z-index:2;padding:15px}
+.ftmo-card .content p{font-size:.7rem;letter-spacing:1px;color:#8b5cf6;font-weight:700;margin-bottom:5px}
+.ftmo-card .content h3{font-size:1rem}
+.plus{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.95);color:#000;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:3;font-weight:700;font-size:1.2rem;cursor:pointer;transition:.2s}
+.challenge{margin:20px;padding:30px 20px;border-radius:28px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);box-shadow:0 0 30px rgba(59,130,246,.4);text-align:center;transition:.3s;position:relative;overflow:hidden}
+.challenge::after{content:'';position:absolute;inset:-40%;background:radial-gradient(circle, rgba(255,255,255,.14), transparent 35%);animation:shine 8s linear infinite;pointer-events:none}
+@keyframes shine{0%{transform:translateX(-20%) rotate(0deg)}100%{transform:translateX(20%) rotate(360deg)}}
+.challenge h1{font-size:2.8rem;margin:10px 0;position:relative;z-index:1}
+.challenge p,.challenge button{position:relative;z-index:1}
+.challenge button{background:#fff;color:#1e3a8a;padding:12px 28px;border:none;border-radius:40px;font-weight:700;margin-top:15px;cursor:pointer;transition:.2s;font-size:1rem}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;padding:20px}
+.stat{background:rgba(255,255,255,.03);padding:20px 12px;border-radius:20px;text-align:center;transition:.25s;backdrop-filter:blur(4px);border:1px solid rgba(139,92,246,.2);transform-style:preserve-3d}
+.stat:hover{transform:translateY(-4px) rotateX(3deg);background:rgba(139,92,246,.08)}
+.stat h2{color:#8b5cf6;font-size:1.5rem}
+.stat p{color:#aaa;font-size:.85rem;margin-top:5px}
+.about,.disclaimer{padding:20px;max-width:1100px;margin:0 auto}
+.panel{background:rgba(255,255,255,.04);border:1px solid rgba(139,92,246,.18);border-radius:24px;padding:22px;backdrop-filter:blur(8px);box-shadow:0 16px 32px rgba(0,0,0,.18)}
+.about h2,.disclaimer h2,.faq h2{margin-bottom:14px;font-size:1.8rem}
+.about p,.disclaimer p{color:#c9c9d3;line-height:1.65}
+.about-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:14px}
+.badge-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.badge{padding:10px 14px;border-radius:999px;background:rgba(59,130,246,.14);border:1px solid rgba(59,130,246,.25);font-size:.9rem;backdrop-filter:blur(8px)}
+.faq{padding:20px;margin-bottom:40px}
+.faq h2{margin-bottom:20px;font-size:1.8rem}
+.faq-item{background:#111;margin-bottom:12px;border-radius:20px;overflow:hidden;border:1px solid rgba(139,92,246,.2)}
+.faq-question{padding:16px 20px;cursor:pointer;font-weight:600;position:relative;transition:.2s}
+.faq-question::after{content:'▼';position:absolute;right:20px;font-size:.8rem;transition:transform .3s;color:#8b5cf6}
+.faq-item.active .faq-question::after{transform:rotate(180deg)}
+.faq-answer{max-height:0;overflow:hidden;transition:max-height .4s ease-out;padding:0 20px;color:#bbb;line-height:1.5}
+.faq-item.active .faq-answer{max-height:120px;padding:0 20px 18px 20px}
+@media(max-width:550px){.hero-banner{min-height:100svh;padding:110px 16px 24px}.hero-logo{font-size:1.4rem;margin-bottom:22px}.challenge-pill{font-size:1rem;padding:12px 22px;margin-bottom:18px}.discover-btn{width:100%;max-width:320px;padding:16px 24px;border-radius:16px}.hero-note{font-size:.62rem;padding:0 4px}.trustpilot{padding:9px 12px;gap:8px}.trustpilot .tp-text{font-size:.82rem}.ftmo-grid{gap:12px;padding:15px}.ftmo-card{height:205px}.challenge h1{font-size:2rem}.stats{gap:12px}.stat{padding:15px 10px}.stat h2{font-size:1.2rem}.about,.disclaimer,.faq{padding:15px}}
+@media(min-width:768px){.ftmo-grid,.stats{grid-template-columns:repeat(4,1fr);max-width:1200px;margin:0 auto}.about-grid{grid-template-columns:1.2fr .8fr}.faq{max-width:800px;margin:0 auto 50px}.challenge{max-width:600px;margin:30px auto}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">⚡ HYCE</div>
+  <button class="btn" id="loginBtn">Login</button>
+</header>
+<div class="hero-banner">
+  <div class="hero-overlay">
+    <div class="hero-logo">HYCE®</div>
+    <div class="trustpilot"><div><div class="stars">★★★★★</div><div class="tp-sub">Trustpilot</div></div><div><div class="tp-text">45,000+ ratings</div><div class="tp-sub">Excellent</div></div></div>
+    <div class="challenge-pill">2-Step Challenge</div>
+    <h1>Turn your opinion into rewards</h1>
+    <button class="discover-btn" id="startBtn">DISCOVER HYCE</button>
+    <p class="hero-note">HYCE provides sample surveys with hypothetical questions for practice only. Users may earn monetary rewards based on their completion rate through such demo survey participation.</p>
+  </div>
+</div>
+<div class="ftmo-grid">
+  <div class="ftmo-card" data-card="rewards"><img src="https://iili.io/BkPr3qQ.png" alt="Financial" loading="lazy"><div class="plus">+</div><div class="content"><p>PAYOUT</p><h3>Financial Rewards</h3></div></div>
+  <div class="ftmo-card" data-card="academy"><img src="https://i.postimg.cc/FkJc7H15/IMG-3644.jpg" alt="Academy" loading="lazy"><div class="plus">+</div><div class="content"><p>ACADEMY</p><h3>Learn Trading</h3></div></div>
+  <div class="ftmo-card" data-card="growth"><img src="https://iili.io/Bkio3OB.webp" alt="Growth" loading="lazy"><div class="plus">+</div><div class="content"><p>GROWTH</p><h3>Trading Progress</h3></div></div>
+  <div class="ftmo-card" data-card="trial"><img src="https://iili.io/BkiMnqb.jpg" alt="Trial" loading="lazy"><div class="plus">+</div><div class="content"><p>TRIAL</p><h3>Risk-Free Trial</h3></div></div>
+</div>
+<div class="challenge">
+  <p>HYCE Challenge</p>
+  <h1>$100,000</h1>
+  <p>Special Deal <span class="orange">$499</span></p>
+  <button id="claimBtn">Claim Discount →</button>
+</div>
+<div class="stats">
+  <div class="stat"><h2>3.5M+</h2><p>Customers</p></div>
+  <div class="stat"><h2>$500M+</h2><p>Paid Out</p></div>
+  <div class="stat"><h2>10+ years</h2><p>Established</p></div>
+  <div class="stat"><h2>140+</h2><p>Countries</p></div>
+</div>
+<section class="about">
+  <div class="panel">
+    <h2>About Us</h2>
+    <p>HYCE is a modern survey platform designed to help users explore real surveys, paid participation opportunities, and platform features in a sleek mobile-friendly interface. The goal is to keep the layout premium, engaging, and easy to use while maintaining a futuristic feel.</p>
+    <div class="badge-row">
+      <div class="badge">Secure Demo Environment</div>
+      <div class="badge">Rewards Experience</div>
+      <div class="badge">Mobile First</div>
+      <div class="badge">Fast UI</div>
+    </div>
+  </div>
+</section>
+<section class="disclaimer">
+  <div class="panel">
+    <h2>Disclaimer</h2>
+    <p>HYCE provides real surveys from companies seeking genuine feedback on their products. Users earn monetary rewards upon successful completion of each survey. Rewards are guaranteed and paid out according to the stated terms. Please review each survey’s requirements carefully before participating.</p>
+  </div>
+</section>
+<div class="faq">
+  <h2>❓ Frequently Asked</h2>
+  <div class="faq-item"><div class="faq-question">What happens when I pass?</div><div class="faq-answer">You receive rewards up to $10,000 and unlock higher payout percentages up to 90%.</div></div>
+  <div class="faq-item"><div class="faq-question">Can I lose money?</div><div class="faq-answer">No real risk — our demo environment lets you practice before trading real funds.</div></div>
+  <div class="faq-item"><div class="faq-question">How long does verification take?</div><div class="faq-answer">Usually within 24-48 hours after completing all requirements.</div></div>
+</div>
+<script>
+const goLogin=()=>window.location.href='login.html';
+document.getElementById('startBtn')?.addEventListener('click',goLogin);
+document.getElementById('loginBtn')?.addEventListener('click',goLogin);
+document.querySelectorAll('.faq-question').forEach(q=>q.addEventListener('click',e=>{e.stopPropagation();q.parentElement.classList.toggle('active')}));
+document.querySelectorAll('.plus').forEach(plus=>plus.addEventListener('click',e=>{e.stopPropagation();const card=plus.closest('.ftmo-card');const title=card.querySelector('.content h3')?.innerText||'item';alert(`✨ "${title}" added to your watchlist!`)}));
+document.querySelectorAll('.ftmo-card').forEach(card=>card.addEventListener('click',()=>{const title=card.querySelector('.content h3')?.innerText||'Card';console.log(`Opening: ${title}`)}));
+document.getElementById('claimBtn')?.addEventListener('click',()=>alert('🎉 Discount claimed! Check your email for details.'));
+</script>
+</body>
+</html>

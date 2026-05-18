@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convert Points to Cash</title>
+<!-- Font Awesome 6 (Free) for real brand icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#121a2c,#050816 55%,#020617);color:#fff;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20%;background:radial-gradient(circle at 15% 20%,rgba(124,58,237,.18),transparent 26%),radial-gradient(circle at 80% 20%,rgba(74,222,128,.12),transparent 24%),radial-gradient(circle at 50% 85%,rgba(59,130,246,.12),transparent 26%);animation:bgFloat 12s ease-in-out infinite alternate;pointer-events:none}
+@keyframes bgFloat{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(16px,-10px,0) scale(1.02)}}
+.back-bar{padding:12px 18px 0;position:relative;z-index:1}
+.back-btn{display:inline-block;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:8px 16px;border-radius:40px;color:#4ade80;text-decoration:none;font-size:13px;transition:.2s}
+.back-btn:hover{background:rgba(74,222,128,.15);border-color:#4ade80}
+.header{padding:8px 18px 8px;font-size:18px;font-weight:bold;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+.header-chip{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:12px;color:#cbd5e1}
+.balance-section{margin:12px 15px 0;padding:22px 18px;text-align:center;border-radius:24px;background:rgba(17,24,39,.72);border:1px solid rgba(124,58,237,.25);box-shadow:0 18px 36px rgba(0,0,0,.34);backdrop-filter:blur(16px);position:relative;overflow:hidden}
+.balance-section::before{content:"";position:absolute;inset:-40%;background:radial-gradient(circle,rgba(124,58,237,.2),transparent 40%),radial-gradient(circle at 80% 20%,rgba(74,222,128,.12),transparent 30%);animation:slowGlow 10s ease-in-out infinite alternate;pointer-events:none}
+.balance-amount{font-size:40px;font-weight:800;letter-spacing:.3px;position:relative;z-index:1}
+.balance-sub{font-size:14px;color:#9ca3af;position:relative;z-index:1}
+.balance-meta{margin-top:8px;font-size:12px;color:#cbd5e1;opacity:.85;position:relative;z-index:1}
+.live-badge{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:8px 12px;border-radius:999px;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.22);font-size:12px;font-weight:700;position:relative;z-index:1}
+.live-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 10px rgba(74,222,128,.75)}
+.quick-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:15px}
+.quick{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center;backdrop-filter:blur(8px)}
+.quick b{display:block;font-size:16px;margin-bottom:4px}
+.quick span{font-size:11px;color:#cbd5e1;opacity:.8}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 15px 15px}
+.stat{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:12px;text-align:center}
+.stat b{display:block;font-size:15px}
+.stat span{font-size:11px;color:#cbd5e1;opacity:.8}
+.card{background:rgba(17,24,39,.78);margin:15px;border-radius:18px;padding:16px;border:1px solid rgba(255,255,255,.06);box-shadow:0 14px 30px rgba(0,0,0,.24);backdrop-filter:blur(10px);position:relative;overflow:hidden}
+.card::after{content:"";position:absolute;inset:-35%;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.08) 50%,transparent 65%);animation:shine 7s linear infinite;pointer-events:none}
+.card h4{margin:0 0 12px;font-size:15px;position:relative;z-index:1}
+.convert-box{background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(34,197,94,.08));border-radius:16px;padding:15px;margin-bottom:20px;border:1px solid rgba(139,92,246,.3);text-align:center}
+.convert-rate{font-size:24px;font-weight:bold;color:#facc15;margin:10px 0}
+.convert-note{font-size:12px;color:#cbd5e1;margin-bottom:15px}
+.convert-btn{background:linear-gradient(180deg,#22c55e,#16a34a);color:white;width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;transition:.25s}
+.convert-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(34,197,94,.3)}
+.convert-btn:disabled{opacity:0.5;cursor:not-allowed;background:linear-gradient(180deg,#6b7280,#4b5563);transform:none}
+.payment-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:12px;margin-bottom:20px}
+.payment-option{background:rgba(31,41,55,.8);border:2px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s}
+.payment-option:hover{transform:translateY(-3px);border-color:#7c3aed;background:rgba(124,58,237,.2)}
+.payment-option.selected{background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(34,197,94,.2));border-color:#22c55e;box-shadow:0 0 15px rgba(34,197,94,.2)}
+.payment-icon{font-size:32px;margin-bottom:8px;display:block}
+.payment-name{font-size:11px;font-weight:600;margin-top:5px}
+.payment-sub{font-size:9px;opacity:.6;margin-top:2px}
+.input-label{font-size:12px;color:#cbd5e1;opacity:.8;margin-top:10px;display:block}
+input,select{width:100%;padding:12px 13px;margin-top:10px;border:1px solid rgba(255,255,255,.06);border-radius:12px;background:rgba(31,41,55,.95);color:#fff;outline:none;transition:.25s}
+input:focus,select:focus{border-color:rgba(124,58,237,.6);box-shadow:0 0 0 3px rgba(124,58,237,.14)}
+button{width:100%;padding:14px;margin-top:15px;border:none;border-radius:12px;background:linear-gradient(180deg,#8b5cf6,#6d28d9);color:white;font-size:16px;font-weight:700;cursor:pointer;transition:.25s}
+button:hover{transform:translateY(-1px)}
+button:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.history-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filter{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);font-size:12px;cursor:pointer}
+.filter.active{background:rgba(124,58,237,.28);border-color:rgba(124,58,237,.3)}
+.tx{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #1f2937}
+.tx:last-child{border:none}
+.tx-left{font-size:14px}
+.tx-left small{color:#9ca3af}
+.tx-right{font-size:12px;text-align:right}
+.processing{color:#facc15}.completed{color:#22c55e}.failed{color:#f87171}
+.empty{font-size:13px;color:#9ca3af;padding:8px 0}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(12px);background:#111827;border:1px solid rgba(255,255,255,.08);padding:10px 16px;border-radius:12px;opacity:0;transition:.25s;z-index:2000;box-shadow:0 10px 24px rgba(0,0,0,.35);backdrop-filter:blur(10px)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loader-screen{position:fixed;inset:0;background:#020617;display:none;justify-content:center;align-items:center;flex-direction:column;z-index:1500}
+.spinner{width:50px;height:50px;border:5px solid #1f2937;border-top:5px solid #7c3aed;border-radius:50%;animation:spin 1s linear infinite}
+.loader-screen p{margin-top:12px;color:#cbd5e1}
+.how,.disclaimer,.support{margin:0 15px 15px;padding:16px;border-radius:18px;background:rgba(17,24,39,.72);border:1px solid rgba(255,255,255,.06);backdrop-filter:blur(10px)}
+.how h4,.disclaimer h4,.support h4{margin:0 0 10px}
+.steps{display:grid;gap:10px}
+.step{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+.step b{display:block;margin-bottom:4px}
+.step span{font-size:12px;color:#cbd5e1;opacity:.84}
+.note{font-size:12px;color:#cbd5e1;line-height:1.5}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slowGlow{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(18px,-10px,0)}}
+@keyframes shine{0%{transform:translateX(-20%)}100%{transform:translateX(20%)}}
+@media(max-width:700px){.quick-row,.stats-row{grid-template-columns:1fr 1fr 1fr}.payment-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.quick-row,.stats-row{grid-template-columns:1fr}.payment-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- BACK BUTTON -->
+<div class="back-bar">
+  <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+</div>
+
+<div class="header"><span>Convert Points to Cash</span><span class="header-chip">10,000 pts minimum</span></div>
+
+<div class="balance-section">
+  <div class="balance-amount" id="pointsBalance">0</div>
+  <div class="balance-sub">Your Points Balance</div>
+  <div class="balance-meta" id="updatedAt">Last updated: just now</div>
+  <div class="live-badge"><span class="live-dot"></span>Points Wallet</div>
+</div>
+
+<div class="quick-row">
+  <div class="quick"><b>10,000</b><span>Minimum Points</span></div>
+  <div class="quick"><b>19+</b><span>Payment Methods</span></div>
+  <div class="quick"><b>24h</b><span>Processing Time</span></div>
+</div>
+
+<div class="stats-row">
+  <div class="stat"><b id="totalConverted">0 pts</b><span>Points Converted</span></div>
+  <div class="stat"><b id="pendingCount">0</b><span>Pending Requests</span></div>
+  <div class="stat"><b id="cashEarned">$0.00</b><span>Cash Earned</span></div>
+</div>
+
+<div class="card">
+  <h4>Step 1: Convert Points to Cash</h4>
+  <div class="convert-box">
+    <div class="convert-rate">10,000 Points = $15 USD</div>
+    <div class="convert-note">Convert your points into real cash. Minimum 10,000 points required.</div>
+    <button class="convert-btn" id="convertBtn" onclick="openConvertModal()">Convert Points to Cash</button>
+  </div>
+</div>
+
+<div class="card" id="withdrawCard">
+  <h4>Step 2: Withdraw Your Cash</h4>
+  <div style="font-size:28px; font-weight:bold; color:#4ade80; margin:10px 0; text-align:center;" id="cashAvailable">$0.00</div>
+  <div style="text-align:center; font-size:12px; color:#facc15; margin-bottom:15px;" id="withdrawNote">You have $0.00 available to withdraw. Convert points above first!</div>
+  
+  <span class="input-label">Select Payment Method</span>
+  <div class="payment-grid" id="paymentGrid"></div>
+
+  <span class="input-label">Account or Wallet Details</span>
+  <input type="text" id="wallet" placeholder="Select a payment method first">
+
+  <span class="input-label">Withdrawal Amount (USD)</span>
+  <input type="number" id="amount" placeholder="Enter amount to withdraw (min $15)" min="15">
+
+  <button id="withdrawBtn" onclick="startWithdraw()" disabled>Select Payment Method</button>
+</div>
+
+<div class="card">
+  <h4>Conversion and Withdrawal History</h4>
+  <div class="history-toolbar">
+    <div class="filter active" onclick="setFilter('all', this)">All</div>
+    <div class="filter" onclick="setFilter('Processing', this)">Processing</div>
+    <div class="filter" onclick="setFilter('Completed', this)">Completed</div>
+  </div>
+  <div id="history"></div>
+</div>
+
+<div class="how">
+  <h4>How It Works</h4>
+  <div class="steps">
+    <div class="step"><b>1. Earn Points</b><span>Complete tasks to earn points (max 40 per task, 250 per day).</span></div>
+    <div class="step"><b>2. Convert to Cash</b><span>Once you have 10,000+ points, convert them to cash.</span></div>
+    <div class="step"><b>3. Withdraw Funds</b><span>Select payment method, enter details, and request withdrawal.</span></div>
+  </div>
+</div>
+
+<div class="disclaimer">
+  <h4>Disclaimer</h4>
+  <p class="note">Conversion rate: 10,000 points = $15 USD. Minimum conversion is 10,000 points. Withdrawal requests are processed within 24-48 hours. Ensure your payment details are correct before submitting.</p>
+</div>
+
+<div class="support">
+  <h4>Support</h4>
+  <p class="note">Need help with conversions or withdrawals? Contact our support team through the Contact Us page.</p>
+</div>
+
+<div id="convertModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.95); z-index:2000; align-items:center; justify-content:center;">
+  <div style="background:#1e293b; border-radius:24px; padding:24px; max-width:400px; margin:20px; border:1px solid #7c3aed;">
+    <h3 style="margin:0 0 15px 0;">Convert Points to Cash</h3>
+    <div>Your Points: <strong id="modalPoints" style="color:#facc15;">0</strong></div>
+    <div style="margin:10px 0;">Points to Convert:</div>
+    <input type="number" id="convertPoints" placeholder="Enter points (min 10,000)" style="width:100%; padding:12px; border-radius:12px; background:#0f172a; color:#fff; border:1px solid #334155;">
+    <div style="margin:10px 0;">You will receive: <strong id="convertCashAmount" style="color:#4ade80;">$0.00</strong></div>
+    <div style="display:flex; gap:10px; margin-top:20px;">
+      <button onclick="closeConvertModal()" style="background:#475569; margin:0;">Cancel</button>
+      <button onclick="confirmConversion()" id="confirmConvertBtn" style="background:#22c55e; margin:0;">Confirm Conversion</button>
+    </div>
+  </div>
+</div>
+
+<div class="loader-screen" id="loader">
+  <div class="spinner"></div>
+  <p>Processing...</p>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// Payment Methods with Font Awesome icons
+const paymentMethods = [
+  { name: "PayPal", icon: "fab fa-paypal", sub: "Email required", type: "email", color: "#003087" },
+  { name: "Bank Transfer", icon: "fas fa-university", sub: "US only", type: "account", color: "#1e3a8a" },
+  { name: "USDT (TRC20)", icon: "fas fa-coins", sub: "Crypto wallet", type: "address", color: "#26a17b" },
+  { name: "USDC (ERC20)", icon: "fas fa-chart-line", sub: "Crypto wallet", type: "address", color: "#2775ca" },
+  { name: "Wise", icon: "fas fa-globe", sub: "Email or Phone", type: "email", color: "#00b9ff" },
+  { name: "Skrill", icon: "fas fa-envelope", sub: "Email required", type: "email", color: "#862d5b" },
+  { name: "Payoneer", icon: "fas fa-building", sub: "Email or ID", type: "email", color: "#ff4800" },
+  { name: "Cash App", icon: "fas fa-dollar-sign", sub: "Cashtag", type: "username", color: "#00d632" },
+  { name: "Amazon Gift Card", icon: "fab fa-amazon", sub: "Email delivery", type: "email", color: "#ff9900" },
+  { name: "iTunes Gift Card", icon: "fab fa-apple", sub: "Code via email", type: "email", color: "#ff69b4" },
+  { name: "Vanilla Gift Card", icon: "fas fa-credit-card", sub: "Prepaid card", type: "email", color: "#ffb347" },
+  { name: "Mastercard Gift", icon: "fab fa-cc-mastercard", sub: "Digital card", type: "email", color: "#eb001b" },
+  { name: "Wire Transfer", icon: "fas fa-exchange-alt", sub: "SWIFT or IBAN", type: "swift", color: "#2563eb" },
+  { name: "Revolut", icon: "fas fa-sync", sub: "Phone or Email", type: "email", color: "#007cbe" },
+  { name: "Neteller", icon: "fas fa-network-wired", sub: "Email or ID", type: "email", color: "#2d2d2d" },
+  { name: "Binance Pay", icon: "fab fa-bitcoin", sub: "Binance ID", type: "id", color: "#f0b90b" },
+  { name: "Coinbase", icon: "fab fa-bitcoin", sub: "Email or Address", type: "email", color: "#0052ff" },
+  { name: "Google Pay", icon: "fab fa-google", sub: "Phone or Email", type: "email", color: "#4285f4" },
+  { name: "Apple Pay", icon: "fab fa-apple", sub: "Email or Phone", type: "email", color: "#000000" }
+];
+
+let selectedPaymentMethod = null;
+
+let userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+let cashBalance = parseFloat(localStorage.getItem('cashBalance')) || 0;
+let conversionHistory = JSON.parse(localStorage.getItem('conversionHistory')) || [];
+let withdrawalHistory = JSON.parse(localStorage.getItem('withdrawalHistory')) || [];
+let currentFilter = 'all';
+
+const CONVERSION_RATE = 15 / 10000;
+
+function updateUI() {
+  document.getElementById('pointsBalance').innerText = userPoints.toLocaleString();
+  document.getElementById('totalConverted').innerText = (parseInt(localStorage.getItem('totalConvertedPoints')) || 0).toLocaleString() + ' pts';
+  document.getElementById('pendingCount').innerText = withdrawalHistory.filter(w => w.status === 'Processing').length;
+  document.getElementById('cashEarned').innerText = '$' + cashBalance.toFixed(2);
+  document.getElementById('cashAvailable').innerHTML = '$' + cashBalance.toFixed(2);
+  document.getElementById('updatedAt').innerText = 'Last updated: ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  
+  let withdrawNote = document.getElementById('withdrawNote');
+  if (cashBalance >= 15) {
+    withdrawNote.innerHTML = 'You have $' + cashBalance.toFixed(2) + ' available to withdraw! Select payment method below.';
+    withdrawNote.style.color = '#4ade80';
+  } else if (cashBalance > 0 && cashBalance < 15) {
+    withdrawNote.innerHTML = 'You have $' + cashBalance.toFixed(2) + ' but minimum withdrawal is $15. Convert more points!';
+    withdrawNote.style.color = '#facc15';
+  } else {
+    withdrawNote.innerHTML = 'You have $0.00 available to withdraw. Convert points above first!';
+    withdrawNote.style.color = '#facc15';
+  }
+  
+  let withdrawBtn = document.getElementById('withdrawBtn');
+  if (withdrawBtn) {
+    if (cashBalance >= 15 && selectedPaymentMethod) {
+      withdrawBtn.disabled = false;
+      withdrawBtn.innerText = 'Request Withdrawal';
+    } else if (cashBalance < 15) {
+      withdrawBtn.disabled = true;
+      withdrawBtn.innerText = 'Minimum $15 required';
+    } else if (!selectedPaymentMethod) {
+      withdrawBtn.disabled = true;
+      withdrawBtn.innerText = 'Select payment method first';
+    }
+  }
+}
+
+function renderPaymentMethods() {
+  let grid = document.getElementById('paymentGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  
+  paymentMethods.forEach(method => {
+    let div = document.createElement('div');
+    div.className = 'payment-option';
+    if (selectedPaymentMethod === method.name) div.classList.add('selected');
+    div.innerHTML = `
+      <i class="${method.icon}" style="font-size:32px; margin-bottom:8px; display:block;"></i>
+      <div class="payment-name">${method.name}</div>
+      <div class="payment-sub">${method.sub}</div>
+    `;
+    div.onclick = () => selectPaymentMethod(method);
+    grid.appendChild(div);
+  });
+}
+
+function selectPaymentMethod(method) {
+  selectedPaymentMethod = method.name;
+  renderPaymentMethods();
+  
+  let walletInput = document.getElementById('wallet');
+  if (method.type === 'email') {
+    walletInput.placeholder = 'Enter your ' + method.name + ' email address';
+  } else if (method.type === 'address') {
+    walletInput.placeholder = 'Enter your ' + method.name + ' wallet address';
+  } else if (method.type === 'username') {
+    walletInput.placeholder = 'Enter your Cashtag or username';
+  } else if (method.type === 'swift') {
+    walletInput.placeholder = 'Enter SWIFT or IBAN or Account details';
+  } else if (method.type === 'id') {
+    walletInput.placeholder = 'Enter your ' + method.name + ' ID';
+  } else {
+    walletInput.placeholder = 'Enter your ' + method.name + ' details';
+  }
+  
+  updateUI();
+}
+
+function toast(msg, isError = false) {
+  let t = document.getElementById('toast');
+  t.innerText = msg;
+  t.style.borderColor = isError ? '#ef4444' : '#4ade80';
+  t.classList.add('show');
+  clearTimeout(window.toastTimer);
+  window.toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function openConvertModal() {
+  if (userPoints < 10000) {
+    toast('You need at least 10,000 points to convert! Keep completing tasks.', true);
+    return;
+  }
+  document.getElementById('modalPoints').innerText = userPoints.toLocaleString();
+  document.getElementById('convertPoints').value = '';
+  document.getElementById('convertCashAmount').innerHTML = '$0.00';
+  document.getElementById('convertModal').style.display = 'flex';
+  
+  document.getElementById('convertPoints').oninput = function() {
+    let pts = parseInt(this.value) || 0;
+    if (pts > userPoints) pts = userPoints;
+    if (pts < 10000) {
+      document.getElementById('convertCashAmount').innerHTML = '$0.00 (min 10,000 pts)';
+    } else {
+      let cash = (pts * CONVERSION_RATE).toFixed(2);
+      document.getElementById('convertCashAmount').innerHTML = '$' + cash;
+    }
+  };
+}
+
+function closeConvertModal() {
+  document.getElementById('convertModal').style.display = 'none';
+}
+
+function confirmConversion() {
+  let pointsToConvert = parseInt(document.getElementById('convertPoints').value) || 0;
+  
+  if (pointsToConvert < 10000) {
+    toast('Minimum conversion is 10,000 points', true);
+    return;
+  }
+  if (pointsToConvert > userPoints) {
+    toast('You do not have that many points', true);
+    return;
+  }
+  
+  let cashEarned = pointsToConvert * CONVERSION_RATE;
+  
+  userPoints -= pointsToConvert;
+  cashBalance += cashEarned;
+  
+  let totalConvertedPoints = parseInt(localStorage.getItem('totalConvertedPoints')) || 0;
+  totalConvertedPoints += pointsToConvert;
+  
+  localStorage.setItem('userPoints', userPoints);
+  localStorage.setItem('cashBalance', cashBalance);
+  localStorage.setItem('totalConvertedPoints', totalConvertedPoints);
+  
+  conversionHistory.unshift({
+    points: pointsToConvert,
+    cash: cashEarned,
+    date: new Date().toLocaleString(),
+    status: 'Completed'
+  });
+  localStorage.setItem('conversionHistory', JSON.stringify(conversionHistory));
+  
+  toast('Successfully converted ' + pointsToConvert.toLocaleString() + ' points to $' + cashEarned.toFixed(2) + '!');
+  closeConvertModal();
+  updateUI();
+  render();
+}
+
+function setFilter(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function statusClass(status) {
+  return status === 'Processing' ? 'processing' : (status === 'Completed' ? 'completed' : 'failed');
+}
+
+function render() {
+  let box = document.getElementById("history");
+  box.innerHTML = "";
+  
+  let conversionItems = conversionHistory.map(h => ({
+    type: 'Conversion',
+    amount: h.cash,
+    points: h.points,
+    date: h.date,
+    status: h.status
+  }));
+  
+  let withdrawalItems = withdrawalHistory.map(h => ({
+    type: 'Withdrawal',
+    amount: h.amount,
+    method: h.method,
+    date: h.date,
+    status: h.status
+  }));
+  
+  let allItems = [...conversionItems, ...withdrawalItems].sort((a,b) => new Date(b.date) - new Date(a.date));
+  let items = currentFilter === 'all' ? allItems : allItems.filter(h => h.status === currentFilter);
+  
+  if (!items.length) {
+    box.innerHTML = '<div class="empty">No transactions yet. Convert points to get started!</div>';
+    return;
+  }
+  
+  items.forEach(h => {
+    let div = document.createElement("div");
+    div.className = "tx";
+    if (h.type === 'Conversion') {
+      div.innerHTML = `
+        <div class="tx-left">Converted ${h.points.toLocaleString()} pts to $${h.amount.toFixed(2)}<br><small>${h.date}</small></div>
+        <div class="tx-right ${statusClass(h.status)}">${h.status}</div>
+      `;
+    } else {
+      div.innerHTML = `
+        <div class="tx-left">Withdrew $${h.amount.toFixed(2)} via ${h.method}<br><small>${h.date}</small></div>
+        <div class="tx-right ${statusClass(h.status)}">${h.status}</div>
+      `;
+    }
+    box.appendChild(div);
+  });
+}
+
+function startWithdraw() {
+  let wallet = document.getElementById("wallet").value.trim();
+  let amount = parseFloat(document.getElementById('amount').value || '0');
+  let btn = document.getElementById('withdrawBtn');
+  
+  if (!selectedPaymentMethod) return toast("Select a payment method first", true);
+  if (!wallet) return toast("Enter your payment details", true);
+  if (!amount || amount <= 0) return toast("Enter a valid amount", true);
+  if (amount < 15) return toast("Minimum withdrawal is $15", true);
+  if (amount > cashBalance) return toast("Amount exceeds your cash balance", true);
+  
+  document.getElementById("loader").style.display = "flex";
+  btn.disabled = true;
+  
+  setTimeout(() => {
+    document.getElementById("loader").style.display = "none";
+    
+    cashBalance -= amount;
+    localStorage.setItem('cashBalance', cashBalance);
+    
+    withdrawalHistory.unshift({
+      amount: amount,
+      method: selectedPaymentMethod,
+      wallet: wallet,
+      status: "Processing",
+      date: new Date().toLocaleString()
+    });
+    localStorage.setItem('withdrawalHistory', JSON.stringify(withdrawalHistory));
+    
+    updateUI();
+    render();
+    toast("Withdrawal request submitted! Will be processed within 24-48 hours.");
+    
+    document.getElementById("amount").value = "";
+    document.getElementById("wallet").value = "";
+    selectedPaymentMethod = null;
+    renderPaymentMethods();
+    btn.disabled = false;
+  }, 2000);
+}
+
+function init() {
+  userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+  cashBalance = parseFloat(localStorage.getItem('cashBalance')) || 0;
+  conversionHistory = JSON.parse(localStorage.getItem('conversionHistory')) || [];
+  withdrawalHistory = JSON.parse(localStorage.getItem('withdrawalHistory')) || [];
+  
+  renderPaymentMethods();
+  updateUI();
+  render();
+}
+
+init();
+
+setInterval(() => {
+  let freshPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+  let freshCash = parseFloat(localStorage.getItem('cashBalance')) || 0;
+  if (freshPoints !== userPoints || freshCash !== cashBalance) {
+    userPoints = freshPoints;
+    cashBalance = freshCash;
+    updateUI();
+    render();
+  }
+}, 2000);
+</script>
+</body>
+</html>

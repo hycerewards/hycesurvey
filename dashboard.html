@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HYCE Elite</title>
 <style>
-/* ========== YOUR EXISTING STYLES (unchanged except announcement animation) ========== */
+/* ========== YOUR EXISTING STYLES (unchanged) ========== */
 body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0f172a,#020617);color:#fff;overflow-x:hidden}
 *{box-sizing:border-box}
 .topbar{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#020617;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:1200}
@@ -111,16 +111,15 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
   <a href="reward-system.html">Rewards</a>
   <a href="contact.html">Contact Us</a>
   <a href="withdraw.html">Withdraw</a>
-  <!-- RC Panel removed from menu -->
   <a href="referral.html">Referral</a>
 </div>
 <div class="balance-box"><div class="balance-top"><div class="balance-amount" id="balance">0</div><div class="live-badge">Points Balance</div></div><div class="balance-meta" id="lastUpdated">Last updated: just now</div><div class="progress"><div class="progress-fill" id="progressFill"></div></div></div>
 <div class="stats-row"><div class="stat-mini"><b id="tasksCompleted">0</b><span>Tasks completed</span></div><div class="stat-mini"><b id="winRate">0%</b><span>Success rate</span></div><div class="stat-mini"><b id="totalPoints">0</b><span>Total points earned</span></div></div>
 
-<!-- ========== ANNOUNCEMENT SECTION (edit the text below as you like) ========== -->
+<!-- ========== ANNOUNCEMENT SECTION ========== -->
 <div class="main-task">
   <h3>📢 ANNOUNCEMENT</h3>
-  <h2>🎉 New Referral Bonus! Invite a friend and earn 100 bonus points. 🎉</h2>
+  <h2>‼️Paypal is now available in your Region‼️</h2>
 </div>
 
 <div class="section-title"><span>Premium Offers</span><span style="opacity:.55;font-size:12px">Complete offers to earn points</span></div>
@@ -136,7 +135,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 <div id="feed" class="live-feed"></div><div class="toast" id="toast"></div>
 
 <script>
-// ========== AUTHENTICATION (redirect if not logged in) ==========
+// ========== AUTHENTICATION ==========
 const currentUser = localStorage.getItem('hyce_user');
 const currentPin = localStorage.getItem('hyce_pin');
 if (!currentUser || !currentPin) {
@@ -168,23 +167,22 @@ async function refreshPoints() {
   }
 }
 
-// ========== TASKS DATA (unchanged) ==========
+// ========== TASKS DATA – POINTS INCREASED (no limits) ==========
 const premiumOffers = [
-  { id: 1, name: 'Grab Superapp', desc: 'Everyday Everything App', icon: '🛒', rating: '★★★★★', reviews: '386K', points: 25, tag: 'Hot', color: '#facc15', difficulty: 'Easy', requiredSeconds: 15 },
-  { id: 2, name: 'Mystic Rewards', desc: 'Play & Earn Daily', icon: '🎮', rating: '★★★★★', reviews: '124K', points: 40, tag: 'Limited', color: '#8b5cf6', difficulty: 'Medium', requiredSeconds: 30 },
-  { id: 3, name: 'Cash Galaxy', desc: 'Spin to Win Big', icon: '💰', rating: '★★★★☆', reviews: '89K', points: 35, tag: 'Hot', color: '#22c55e', difficulty: 'Medium', requiredSeconds: 25 },
-  { id: 4, name: 'Fortune Wheel', desc: 'Daily Free Spins', icon: '🎡', rating: '★★★★★', reviews: '234K', points: 20, tag: 'New', color: '#f97316', difficulty: 'Easy', requiredSeconds: 10 },
-  { id: 5, name: 'Reward Hunt', desc: 'Complete Missions', icon: '🏆', rating: '★★★★☆', reviews: '67K', points: 50, tag: 'Hard', color: '#ef4444', difficulty: 'Hard', requiredSeconds: 45 },
-  { id: 6, name: 'Lucky Patcher', desc: 'Exclusive Bonuses', icon: '🍀', rating: '★★★★★', reviews: '512K', points: 30, tag: 'Hot', color: '#06b6d4', difficulty: 'Medium', requiredSeconds: 20 },
-  { id: 7, name: 'Coin Master', desc: 'Build Your Village', icon: '🪙', rating: '★★★★☆', reviews: '1.2M', points: 15, tag: 'New', color: '#eab308', difficulty: 'Easy', requiredSeconds: 10 },
-  { id: 8, name: 'Spin Dynasty', desc: 'Jackpot Every Hour', icon: '🎰', rating: '★★★★★', reviews: '445K', points: 75, tag: 'Top Payout', color: '#ec4899', difficulty: 'Hard', requiredSeconds: 60 },
-  { id: 9, name: 'Treasure Isle', desc: 'Discover Hidden Gems', icon: '🏝️', rating: '★★★★☆', reviews: '178K', points: 45, tag: 'Medium', color: '#14b8a6', difficulty: 'Medium', requiredSeconds: 35 },
-  { id: 10, name: 'Bonus Blitz', desc: 'Fast Cash Rewards', icon: '⚡', rating: '★★★★★', reviews: '321K', points: 60, tag: 'Hot', color: '#a855f7', difficulty: 'Hard', requiredSeconds: 50 }
+  { id: 1, name: 'Grab Superapp', desc: 'Everyday Everything App', icon: '🛒', rating: '★★★★★', reviews: '386K', points: 50, tag: 'Hot', color: '#facc15', difficulty: 'Easy', requiredSeconds: 15 },
+  { id: 2, name: 'Mystic Rewards', desc: 'Play & Earn Daily', icon: '🎮', rating: '★★★★★', reviews: '124K', points: 60, tag: 'Limited', color: '#8b5cf6', difficulty: 'Medium', requiredSeconds: 30 },
+  { id: 3, name: 'Cash Galaxy', desc: 'Spin to Win Big', icon: '💰', rating: '★★★★☆', reviews: '89K', points: 55, tag: 'Hot', color: '#22c55e', difficulty: 'Medium', requiredSeconds: 25 },
+  { id: 4, name: 'Fortune Wheel', desc: 'Daily Free Spins', icon: '🎡', rating: '★★★★★', reviews: '234K', points: 45, tag: 'New', color: '#f97316', difficulty: 'Easy', requiredSeconds: 10 },
+  { id: 5, name: 'Reward Hunt', desc: 'Complete Missions', icon: '🏆', rating: '★★★★☆', reviews: '67K', points: 70, tag: 'Hard', color: '#ef4444', difficulty: 'Hard', requiredSeconds: 45 },
+  { id: 6, name: 'Lucky Patcher', desc: 'Exclusive Bonuses', icon: '🍀', rating: '★★★★★', reviews: '512K', points: 55, tag: 'Hot', color: '#06b6d4', difficulty: 'Medium', requiredSeconds: 20 },
+  { id: 7, name: 'Coin Master', desc: 'Build Your Village', icon: '🪙', rating: '★★★★☆', reviews: '1.2M', points: 40, tag: 'New', color: '#eab308', difficulty: 'Easy', requiredSeconds: 10 },
+  { id: 8, name: 'Spin Dynasty', desc: 'Jackpot Every Hour', icon: '🎰', rating: '★★★★★', reviews: '445K', points: 100, tag: 'Top Payout', color: '#ec4899', difficulty: 'Hard', requiredSeconds: 60 },
+  { id: 9, name: 'Treasure Isle', desc: 'Discover Hidden Gems', icon: '🏝️', rating: '★★★★☆', reviews: '178K', points: 65, tag: 'Medium', color: '#14b8a6', difficulty: 'Medium', requiredSeconds: 35 },
+  { id: 10, name: 'Bonus Blitz', desc: 'Fast Cash Rewards', icon: '⚡', rating: '★★★★★', reviews: '321K', points: 80, tag: 'Hot', color: '#a855f7', difficulty: 'Hard', requiredSeconds: 50 }
 ];
 
-// ========== 24-HOUR COOLDOWN (localStorage) ==========
-let taskCooldowns = JSON.parse(localStorage.getItem('taskCooldowns')) || {};
-localStorage.removeItem('rewardTasksCompleted'); // clean legacy
+// ⚠️ COOLDOWN REMOVED – clear any existing cooldowns
+let taskCooldowns = {};
 
 // ========== FAKE TESTIMONIALS (unchanged) ==========
 const testimonials = [
@@ -226,31 +224,25 @@ function showToast(message, isError = false) {
 
 function updateUI() {
   document.getElementById('balance').innerText = currentPoints;
-  let activeCooldowns = Object.keys(taskCooldowns).filter(id => taskCooldowns[id] > Date.now()).length;
-  document.getElementById('tasksCompleted').innerText = activeCooldowns;
+  // No cooldowns – tasksCompleted shows total unique tasks? We'll show total tasks completed from storage
+  let completedCount = JSON.parse(localStorage.getItem('rewardTasksCompleted'))?.length || 0;
+  document.getElementById('tasksCompleted').innerText = completedCount;
   document.getElementById('totalPoints').innerText = currentPoints;
   let streak = parseInt(localStorage.getItem('streak')) || 0;
   document.getElementById('streakCount').innerText = streak;
-  let winRate = activeCooldowns > 0 ? Math.min(Math.floor((activeCooldowns / premiumOffers.length) * 100), 100) : 0;
+  let winRate = completedCount > 0 ? Math.min(Math.floor((completedCount / premiumOffers.length) * 100), 100) : 0;
   document.getElementById('winRate').innerText = winRate + '%';
   let progressPercent = Math.min((currentPoints / 5000) * 100, 100);
   document.getElementById('progressFill').style.width = progressPercent + '%';
   document.getElementById('lastUpdated').innerText = 'Last updated: ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
 
+// ⚠️ START TASK – NO COOLDOWN CHECK
 function startTask(offerId, event) {
   if(event) event.stopPropagation();
   let offer = premiumOffers.find(o => o.id === offerId);
   if(!offer) return;
-  let cooldownEnd = taskCooldowns[offerId];
-  if (cooldownEnd && cooldownEnd > Date.now()) {
-    let remaining = Math.ceil((cooldownEnd - Date.now()) / 1000);
-    let hours = Math.floor(remaining / 3600);
-    let minutes = Math.floor((remaining % 3600) / 60);
-    let seconds = remaining % 60;
-    showToast(`Task on cooldown! Available in ${hours}h ${minutes}m ${seconds}s`, true);
-    return;
-  }
+  // No cooldown check – always allowed
   localStorage.setItem('activeTaskId', offerId);
   localStorage.setItem('activeTaskPoints', offer.points);
   localStorage.setItem('activeTaskName', offer.name);
@@ -264,6 +256,7 @@ function checkForCompletedTask() {
     let taskData = JSON.parse(justCompleted);
     let offer = premiumOffers.find(o => o.id === taskData.id);
     if(offer) {
+      // Update streak
       let streak = parseInt(localStorage.getItem('streak')) || 0;
       let lastTaskDate = localStorage.getItem('lastTaskDate') || null;
       let today = new Date().toDateString();
@@ -277,10 +270,8 @@ function checkForCompletedTask() {
       localStorage.setItem('streak', streak);
       localStorage.setItem('lastTaskDate', today);
       
-      let cooldownEnd = Date.now() + (24 * 60 * 60 * 1000);
-      taskCooldowns[taskData.id] = cooldownEnd;
-      localStorage.setItem('taskCooldowns', JSON.stringify(taskCooldowns));
-      showToast(`Task completed! +${taskData.points} points added. Next task available in 24h.`);
+      // NO COOLDOWN – just show completion message
+      showToast(`Task completed! +${taskData.points} points added.`);
       refreshPoints().then(() => updateUI());
     }
     localStorage.removeItem('justCompletedTask');
@@ -288,39 +279,16 @@ function checkForCompletedTask() {
   }
 }
 
-function getCooldownDisplay(cooldownEnd) {
-  if (!cooldownEnd || cooldownEnd <= Date.now()) return null;
-  let remaining = Math.ceil((cooldownEnd - Date.now()) / 1000);
-  let hours = Math.floor(remaining / 3600);
-  let minutes = Math.floor((remaining % 3600) / 60);
-  let seconds = remaining % 60;
-  return `Unlocks in ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-}
-
-let countdownInterval = null;
-function startCountdownInterval() {
-  if (countdownInterval) clearInterval(countdownInterval);
-  countdownInterval = setInterval(() => renderPremiumGrid(), 1000);
-}
-
+// ⚠️ COOLDOWN DISPLAY REMOVED – always show "Start Task"
 function renderPremiumGrid() {
   let grid = document.getElementById('premiumGrid');
   if(!grid) return;
   grid.innerHTML = '';
   premiumOffers.forEach(offer => {
-    let cooldownEnd = taskCooldowns[offer.id];
-    let isOnCooldown = cooldownEnd && cooldownEnd > Date.now();
-    let cooldownText = isOnCooldown ? getCooldownDisplay(cooldownEnd) : null;
     let difficultyColor = offer.difficulty === 'Easy' ? '#22c55e' : (offer.difficulty === 'Medium' ? '#facc15' : '#ef4444');
-    let displayPoints = Math.min(offer.points, 40);
+    let displayPoints = offer.points; // No cap – show full points
     let card = document.createElement('div');
     card.className = 'premium-card';
-    let buttonHtml = '';
-    if (isOnCooldown) {
-      buttonHtml = `<button class="premium-btn" disabled style="opacity:0.7; background:#4b5563;">⏳ ${cooldownText}</button>`;
-    } else {
-      buttonHtml = `<button class="premium-btn" onclick="startTask(${offer.id}, event)">Start Task</button>`;
-    }
     card.innerHTML = `
       <div class="premium-icon" style="background: linear-gradient(135deg, ${offer.color}, ${offer.color}88);">${offer.icon}</div>
       <div class="premium-info">
@@ -334,19 +302,13 @@ function renderPremiumGrid() {
       </div>
       <div class="premium-reward">
         <div class="amount">+${displayPoints} pts</div>
-        <div class="small">Max 40 per task</div>
-        ${buttonHtml}
+        <div class="small">No limits</div>
+        <button class="premium-btn" onclick="startTask(${offer.id}, event)">Start Task</button>
       </div>
     `;
     card.onclick = (e) => {
-      if(!isOnCooldown && !e.target.classList.contains('premium-btn')) {
+      if(!e.target.classList.contains('premium-btn')) {
         startTask(offer.id, e);
-      } else if(isOnCooldown) {
-        let remaining = Math.ceil((cooldownEnd - Date.now()) / 1000);
-        let hours = Math.floor(remaining / 3600);
-        let minutes = Math.floor((remaining % 3600) / 60);
-        let seconds = remaining % 60;
-        showToast(`Task available in ${hours}h ${minutes}m ${seconds}s`, true);
       }
     };
     grid.appendChild(card);
@@ -395,7 +357,6 @@ async function init() {
   await refreshPoints();
   updateUI();
   checkForCompletedTask();
-  startCountdownInterval();
   setInterval(refreshPoints, 10000);
 }
 init();
@@ -403,7 +364,7 @@ init();
 // Live feed
 const feed = document.getElementById('feed');
 const names = ['John (UK)', 'Emma (US)', 'Liam (CA)', 'Noah (AU)', 'Sophia (NZ)', 'Carlos (ES)', 'Mia (IT)', 'Lucas (FR)'];
-const pointEarnings = ['+25 pts', '+30 pts', '+35 pts', '+40 pts', '+28 pts', '+38 pts', '+32 pts'];
+const pointEarnings = ['+50 pts', '+60 pts', '+70 pts', '+80 pts', '+100 pts', '+55 pts', '+65 pts'];
 function showFeed() {
   let user = names[Math.floor(Math.random() * names.length)];
   let points = pointEarnings[Math.floor(Math.random() * pointEarnings.length)];

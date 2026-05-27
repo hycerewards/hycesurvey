@@ -99,7 +99,7 @@ button:disabled{opacity:.5;cursor:not-allowed;transform:none}
     <span id="taskHint">Open the linked page in a new tab</span>
   </div>
 
-  <p class="note">Upload clear proof of completion. Points awarded after 60-second review. Max 40 points per task, 250 points per day.</p>
+  <p class="note">Upload clear proof of completion. Points awarded after 60-second review.</p>
 </div>
 
 <div class="loader-screen" id="loader">
@@ -181,13 +181,12 @@ const taskLinks = [
 const taskPointsMap = {1:25,2:40,3:35,4:20,5:50,6:30,7:15,8:75,9:45,10:60};
 function getTaskPoints() {
   let raw = taskPointsMap[taskId] || 25;
-  return Math.min(raw, 40);
+  // NO CAP – return full points
+  return raw;
 }
 let currentTaskPoints = getTaskPoints();
 
-// Cooldown (localStorage)
-let taskCooldowns = JSON.parse(localStorage.getItem('taskCooldowns')) || {};
-
+// ⚠️ COOLDOWN REMOVED – no longer used
 // UI elements
 document.getElementById("taskTitle").innerText = taskList[taskId-1];
 document.getElementById('taskHint').innerText = 'Task #' + taskId + ' selected';
@@ -222,27 +221,15 @@ function showToast(msg, isErr=false){
 function setProgress(percent){progressFill.style.width = Math.min(percent,100) + '%';}
 function showHint(){showToast('Start task, complete it, upload screenshot, wait 60 seconds review, then get points');}
 
+// ⚠️ COOLDOWN FUNCTION REMOVED – always returns false
 function isTaskOnCooldown() {
-  let cooldownEnd = taskCooldowns[taskId];
-  return cooldownEnd && cooldownEnd > Date.now();
+  return false; // No cooldown – always available
 }
 
-if (isTaskOnCooldown()) {
-  let cooldownEnd = taskCooldowns[taskId];
-  let remain = Math.ceil((cooldownEnd - Date.now())/1000);
-  let minutes = Math.floor(remain/60);
-  let seconds = remain%60;
-  statusEl.innerText = `Task on cooldown. Available in ${minutes}m ${seconds}s.`;
-  startBtn.disabled = true;
-  uploadBtn.disabled = true;
-  uploadLabel.style.opacity = "0.5";
-  imageInput.disabled = true;
-}
-
+// Cooldown check always passes now
 uploadLabel.addEventListener('click', function(e) {
   e.stopPropagation();
   if (!sessionStarted) { showToast('Please start the task first'); return; }
-  if (isTaskOnCooldown()) { showToast('Task already completed (cooldown active)'); return; }
   if (isUnderReview) { showToast('Task already under review'); return; }
   imageInput.click();
 });
@@ -255,7 +242,7 @@ imageInput.addEventListener('change', function(e) {
     reader.onload = function(ev) {
       uploadedImageData = ev.target.result;
       previewContainer.innerHTML = '<img src="' + uploadedImageData + '" class="image-preview" alt="Preview">';
-      if (sessionStarted && !isUnderReview && !isTaskOnCooldown()) {
+      if (sessionStarted && !isUnderReview) {
         uploadBtn.disabled = false;
         statusEl.innerText = "Image ready! Click 'Upload and Submit' to start review.";
       }
@@ -267,12 +254,8 @@ imageInput.addEventListener('change', function(e) {
   }
 });
 
-// ========== 🔁 MODIFIED START TASK FUNCTION ==========
+// ========== START TASK FUNCTION (no cooldown check) ==========
 function startTask() {
-  if (isTaskOnCooldown()) {
-    showToast('Task already completed (cooldown active)', true);
-    return;
-  }
   let activeTask = localStorage.getItem("activeTaskId");
   if (parseInt(activeTask) !== taskId && activeTask !== null) {
     showToast('Another task already in progress', true);
@@ -286,15 +269,12 @@ function startTask() {
   
   setTimeout(()=>{
     loader.style.display='none';
-    // 🔁 REDIRECT TO TASK PANEL INSTEAD OF OPENING NEW TAB
     window.location.href = 'taskpanel.html?id=' + taskId;
-    // NOTE: statusEl and startBtn disabled will be preserved because page unloads
   }, 900);
 }
 
 async function uploadAndReview() {
   if (!sessionStarted) { showToast('Please start the task first', true); return; }
-  if (isTaskOnCooldown()) { showToast('Task already completed (cooldown active)', true); return; }
   if (!uploadedImageData) { showToast('Please select an image first', true); return; }
   if (isUnderReview) { showToast('Already under review! Wait 60 seconds.', true); return; }
   if (completionLock) return;
@@ -335,12 +315,11 @@ async function awardPointsViaAPI() {
     });
     
     if (result.success) {
-      // Start 24-hour cooldown
-      let cooldownEnd = Date.now() + (24 * 60 * 60 * 1000);
-      taskCooldowns[taskId] = cooldownEnd;
-      localStorage.setItem('taskCooldowns', JSON.stringify(taskCooldowns));
+      // ⚠️ COOLDOWN REMOVED – no 24-hour wait
+      // Just clear active task and redirect
       localStorage.removeItem("activeTaskId");
       
+      // Store completion for dashboard notification (optional)
       localStorage.setItem("justCompletedTask", JSON.stringify({
         id: taskId,
         points: currentTaskPoints,

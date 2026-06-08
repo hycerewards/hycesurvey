@@ -547,7 +547,7 @@ function checkApprovalReady() {
 
 function shareOnWhatsApp() {
   if (whatsappProgress >= 100) return;
-  const message = `🚀 Join me on HYCE Elite – the easiest way to earn real cash by completing simple tasks!\n\nSign up using my link and start earning today. It's free, fast, and pays instantly via PayPal, Crypto, or Gift Cards.\n\n👉 [YOUR_REFERRAL_LINK_HERE]\n\nDon't miss out – limited bonus points for new members!`;
+  const message = `🚀 Join me on HYCE Elite – the easiest way to earn real cash by completing simple tasks!\n\nSign up using my link and start earning today. It's free, fast, and pays instantly via PayPal, Crypto, or Gift Cards.\n\n👉 [https://hycerewards.github.io/hycesurvey/]\n\nDon't miss out – limited bonus points for new members!`;
   window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   const btn = document.getElementById('whatsappBtn');
   const original = btn.innerHTML;
@@ -570,7 +570,7 @@ function shareOnWhatsApp() {
 
 function followFacebook() {
   if (facebookDone) return;
-  window.open('https://facebook.com/yourpage', '_blank');
+  window.open('https://www.facebook.com/share/1BaN6Ha4BE/?mibextid=wwXIfr', '_blank');
   const btn = document.getElementById('facebookBtn');
   const original = btn.innerHTML;
   btn.innerHTML = '<span class="loading-spinner"></span> Verifying...';

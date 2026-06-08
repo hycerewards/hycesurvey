@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HYCE Elite</title>
 <style>
-/* ========== YOUR EXISTING STYLES (unchanged) ========== */
+/* ========== YOUR EXISTING STYLES (same as before - keeping them) ========== */
 body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0f172a,#020617);color:#fff;overflow-x:hidden}
 *{box-sizing:border-box}
 .topbar{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#020617;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:1200}
@@ -506,11 +506,28 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 </div>
 
 <script>
-// ========== ONBOARDING CHECK & LOGIC ==========
-let onboardingDone = localStorage.getItem('onboardingDone');
-let whatsappProgress = parseInt(localStorage.getItem('whatsappProgress')) || 0;
-let facebookDone = localStorage.getItem('facebookDone') === 'true';
+// ========== FIXED: ONBOARDING PER USER (NOT GLOBAL) ==========
+// Get current logged in user
+const currentUser = localStorage.getItem('hyce_user');
+const currentPin = localStorage.getItem('hyce_pin');
 
+// Redirect if not logged in
+if (!currentUser || !currentPin) {
+  window.location.href = 'login.html';
+}
+
+// ========== PER-USER ONBOARDING STORAGE KEYS ==========
+// Each user gets their own localStorage keys prefixed with their username
+function getUserKey(baseKey) {
+  return `user_${currentUser}_${baseKey}`;
+}
+
+// Load onboarding data for THIS SPECIFIC USER
+let onboardingDone = localStorage.getItem(getUserKey('onboardingDone'));
+let whatsappProgress = parseInt(localStorage.getItem(getUserKey('whatsappProgress'))) || 0;
+let facebookDone = localStorage.getItem(getUserKey('facebookDone')) === 'true';
+
+// Show modal ONLY if this specific user hasn't completed onboarding
 if (!onboardingDone) {
   document.getElementById('onboardingModal').classList.add('show');
 } else {
@@ -555,7 +572,7 @@ function shareOnWhatsApp() {
   btn.disabled = true;
   setTimeout(() => {
     whatsappProgress = Math.min(whatsappProgress + 10, 100);
-    localStorage.setItem('whatsappProgress', whatsappProgress);
+    localStorage.setItem(getUserKey('whatsappProgress'), whatsappProgress);
     updateWhatsappUI();
     checkApprovalReady();
     btn.innerHTML = original;
@@ -577,7 +594,7 @@ function followFacebook() {
   btn.disabled = true;
   setTimeout(() => {
     facebookDone = true;
-    localStorage.setItem('facebookDone', 'true');
+    localStorage.setItem(getUserKey('facebookDone'), 'true');
     updateFacebookUI();
     checkApprovalReady();
     btn.innerHTML = original;
@@ -588,7 +605,7 @@ function followFacebook() {
 function approveAccount() {
   if (whatsappProgress >= 100 && facebookDone) {
     onboardingDone = true;
-    localStorage.setItem('onboardingDone', 'true');
+    localStorage.setItem(getUserKey('onboardingDone'), 'true');
     document.getElementById('onboardingModal').classList.remove('show');
     showToast('🎉 Account approved! Welcome to HYCE Elite!');
   }
@@ -600,13 +617,6 @@ document.getElementById('approveBtn').onclick = approveAccount;
 updateWhatsappUI();
 updateFacebookUI();
 checkApprovalReady();
-
-// ========== AUTHENTICATION ==========
-const currentUser = localStorage.getItem('hyce_user');
-const currentPin = localStorage.getItem('hyce_pin');
-if (!currentUser || !currentPin) {
-  window.location.href = 'login.html';
-}
 
 // ========== GOOGLE SHEETS BACKEND ==========
 const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQ_dKNxj0igzkRgMCcb-Ob5sV7Vz-L1EDeHZuN8e0pzEIZA1pJYNUktL0Fne1wgWUi/exec';

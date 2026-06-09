@@ -189,20 +189,20 @@ body::before{
 
   <main class="page">
     <section class="hero">
-      <h1>Site List</h1>
+      <h1>Post List</h1>
       <p>Click the buttons below to start. ‼️Avoid Cheating, as it will result in payment denial‼️</p>
     </section>
 
     <section class="list" id="siteList"></section>
 
-    <div class="footer-note">Opening all Links at once without staying or navigating the page is highly prohibited! and can lead to not been Paid!.</div>
+    <div class="footer-note">Viewing the posts and not completing signup/installation is highly prohibited! and can lead to not been Paid!.</div>
   </main>
 
 <script>
-// ========== EXPANDED TO 10 SITES ==========
+// ========== EXPANDED TO 10 SITES (but ONLY FIRST 2 ARE DISPLAYED) ==========
 const sites = [
-  { name: "Site 1", url: "https://naijanewsdfr.blogspot.com/p/window.html" },
-  { name: "Site 2", url: "https://naijanewsdfr.blogspot.com/p/window.html" },
+  { name: "Task A", url: "https://www.facebook.com/share/1BaN6Ha4BE/?mibextid=wwXIfr" },
+  { name: "Task B", url: "https://www.facebook.com/share/1BaN6Ha4BE/?mibextid=wwXIfr" },
   { name: "Site 3", url: "https://naijanewsdfr.blogspot.com/p/window.html" },
   { name: "Site 4", url: "https://naijanewsdfr.blogspot.com/p/window.html" },
   { name: "Site 5", url: "https://naijanewsdfr.blogspot.com/p/window.html" },
@@ -214,13 +214,16 @@ const sites = [
 ];
 
 const list = document.getElementById('siteList');
-list.innerHTML = sites.map((site, index) => {
-  // Set different instructions: first 2 tasks get signup instruction, rest get navigate instruction
+// Only use the first 2 sites from the array
+const firstTwoSites = sites.slice(0, 2);
+
+list.innerHTML = firstTwoSites.map((site, index) => {
+  // Different instructions: first 2 tasks get signup instruction
   let instruction;
   if (index < 2) {
-    instruction = "Open the site and signup/install App";
+    instruction = "View the Facebook post and signup/install App";
   } else {
-    instruction = "Open the site and Navigate for 30 seconds";
+    instruction = "View the site and Navigate for 30 seconds";
   }
   
   return `
@@ -232,13 +235,14 @@ list.innerHTML = sites.map((site, index) => {
         <span>${instruction}</span>
       </div>
     </div>
-    <button class="view-btn" onclick="openSite(${index}, this)">View Site</button>
+    <button class="view-btn" onclick="openSite(${index}, this)">View Post</button>
   </article>
   `;
 }).join('');
 
 function openSite(index, btn){
-  const site = sites[index];
+  // Since we only have first 2 sites, index will be 0 or 1
+  const site = firstTwoSites[index];
   if(!btn.dataset.originalText) btn.dataset.originalText = btn.textContent;
 
   btn.textContent = 'Opening...';

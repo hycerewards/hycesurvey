@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HYCE Elite</title>
 <style>
-/* ========== YOUR EXISTING STYLES (same as before - keeping them) ========== */
+/* ========== YOUR EXISTING STYLES (keeping them all) ========== */
 body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0f172a,#020617);color:#fff;overflow-x:hidden}
 *{box-sizing:border-box}
 .topbar{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#020617;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:1200}
@@ -462,7 +462,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 <div class="support-wrap"><div class="panel"><h2>Support</h2><p>Need help with tasks, withdrawals, or account access? Use the contact page or the menu to reach the relevant section quickly whenever you need it.</p></div></div>
 <div id="feed" class="live-feed"></div><div class="toast" id="toast"></div>
 
-<!-- UPGRADED ONBOARDING MODAL -->
+<!-- ONBOARDING MODAL - BACKEND INTEGRATED -->
 <div id="onboardingModal" class="onboarding-modal">
   <div class="floating-particles">
     <div class="particle" style="left:10%;animation-delay:0s"></div>
@@ -506,7 +506,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 </div>
 
 <script>
-// ========== FIXED: ONBOARDING PER USER (NOT GLOBAL) ==========
+// ========== BACKEND-INTEGRATED ONBOARDING ==========
 // Get current logged in user
 const currentUser = localStorage.getItem('hyce_user');
 const currentPin = localStorage.getItem('hyce_pin');
@@ -516,22 +516,73 @@ if (!currentUser || !currentPin) {
   window.location.href = 'login.html';
 }
 
-// ========== PER-USER ONBOARDING STORAGE KEYS ==========
-// Each user gets their own localStorage keys prefixed with their username
-function getUserKey(baseKey) {
-  return `user_${currentUser}_${baseKey}`;
+// ========== GOOGLE SHEETS BACKEND ==========
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVHrLbHy1huhVkrgyghjFmoO1exO6n2Q6kTfJHLPo8_0bnxT239qebxqL8BUaWiKdGCQ/exec';
+
+// API Call function
+async function apiCall(action, params = {}, method = 'POST') {
+  try {
+    const url = new URL(APP_SCRIPT_URL);
+    url.searchParams.append('action', action);
+    Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+    const response = await fetch(url.toString(), { method });
+    return await response.json();
+  } catch (err) {
+    console.error('API Error:', err);
+    return { success: false, error: err.message };
+  }
 }
 
-// Load onboarding data for THIS SPECIFIC USER
-let onboardingDone = localStorage.getItem(getUserKey('onboardingDone'));
-let whatsappProgress = parseInt(localStorage.getItem(getUserKey('whatsappProgress'))) || 0;
-let facebookDone = localStorage.getItem(getUserKey('facebookDone')) === 'true';
+// Onboarding variables
+let whatsappProgress = 0;
+let facebookDone = false;
+let onboardingCompleted = false;
 
-// Show modal ONLY if this specific user hasn't completed onboarding
-if (!onboardingDone) {
-  document.getElementById('onboardingModal').classList.add('show');
-} else {
-  document.getElementById('onboardingModal').style.display = 'none';
+// Load onboarding status from backend
+async function loadOnboardingStatus() {
+  try {
+    const result = await apiCall('checkOnboarding', { username: currentUser }, 'GET');
+    if (result && result.success) {
+      onboardingCompleted = result.onboardingCompleted;
+      whatsappProgress = result.whatsappProgress || 0;
+      facebookDone = result.facebookDone || false;
+      
+      if (!onboardingCompleted) {
+        document.getElementById('onboardingModal').classList.add('show');
+        updateWhatsappUI();
+        updateFacebookUI();
+        checkApprovalReady();
+      } else {
+        document.getElementById('onboardingModal').style.display = 'none';
+      }
+    } else {
+      // If no data exists (new user with old sheet structure), show modal
+      document.getElementById('onboardingModal').classList.add('show');
+      updateWhatsappUI();
+      updateFacebookUI();
+      checkApprovalReady();
+    }
+  } catch (err) {
+    console.error('Error loading onboarding status:', err);
+    // Show modal as fallback
+    document.getElementById('onboardingModal').classList.add('show');
+    updateWhatsappUI();
+    updateFacebookUI();
+    checkApprovalReady();
+  }
+}
+
+// Save onboarding progress to backend
+async function saveOnboardingProgress() {
+  try {
+    await apiCall('updateOnboarding', {
+      username: currentUser,
+      whatsappProgress: whatsappProgress,
+      facebookDone: facebookDone
+    }, 'POST');
+  } catch (err) {
+    console.error('Error saving onboarding progress:', err);
+  }
 }
 
 function updateWhatsappUI() {
@@ -562,7 +613,7 @@ function checkApprovalReady() {
   approveBtn.disabled = !(whatsappProgress >= 100 && facebookDone);
 }
 
-function shareOnWhatsApp() {
+async function shareOnWhatsApp() {
   if (whatsappProgress >= 100) return;
   const message = `🚀 Join me on HYCE Elite – the easiest way to earn real cash by completing simple tasks!\n\nSign up using my link and start earning today. It's free, fast, and pays instantly via PayPal, Crypto, or Gift Cards.\n\n👉 [https://hycerewards.github.io/hycesurvey/]\n\nDon't miss out – limited bonus points for new members!`;
   window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
@@ -570,9 +621,9 @@ function shareOnWhatsApp() {
   const original = btn.innerHTML;
   btn.innerHTML = '<span class="loading-spinner"></span> Sharing...';
   btn.disabled = true;
-  setTimeout(() => {
+  setTimeout(async () => {
     whatsappProgress = Math.min(whatsappProgress + 10, 100);
-    localStorage.setItem(getUserKey('whatsappProgress'), whatsappProgress);
+    await saveOnboardingProgress();
     updateWhatsappUI();
     checkApprovalReady();
     btn.innerHTML = original;
@@ -585,16 +636,16 @@ function shareOnWhatsApp() {
   }, 3000);
 }
 
-function followFacebook() {
+async function followFacebook() {
   if (facebookDone) return;
   window.open('https://www.facebook.com/share/1BaN6Ha4BE/?mibextid=wwXIfr', '_blank');
   const btn = document.getElementById('facebookBtn');
   const original = btn.innerHTML;
   btn.innerHTML = '<span class="loading-spinner"></span> Verifying...';
   btn.disabled = true;
-  setTimeout(() => {
+  setTimeout(async () => {
     facebookDone = true;
-    localStorage.setItem(getUserKey('facebookDone'), 'true');
+    await saveOnboardingProgress();
     updateFacebookUI();
     checkApprovalReady();
     btn.innerHTML = original;
@@ -602,33 +653,22 @@ function followFacebook() {
   }, 2000);
 }
 
-function approveAccount() {
+async function approveAccount() {
   if (whatsappProgress >= 100 && facebookDone) {
-    onboardingDone = true;
-    localStorage.setItem(getUserKey('onboardingDone'), 'true');
+    onboardingCompleted = true;
+    await saveOnboardingProgress();
     document.getElementById('onboardingModal').classList.remove('show');
     showToast('🎉 Account approved! Welcome to HYCE Elite!');
   }
 }
 
+// Attach event listeners
 document.getElementById('whatsappBtn').onclick = shareOnWhatsApp;
 document.getElementById('facebookBtn').onclick = followFacebook;
 document.getElementById('approveBtn').onclick = approveAccount;
-updateWhatsappUI();
-updateFacebookUI();
-checkApprovalReady();
 
-// ========== GOOGLE SHEETS BACKEND ==========
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQ_dKNxj0igzkRgMCcb-Ob5sV7Vz-L1EDeHZuN8e0pzEIZA1pJYNUktL0Fne1wgWUi/exec';
+// ========== POINTS & TASKS FUNCTIONS ==========
 let currentPoints = 0;
-
-async function apiCall(action, params, method = 'POST') {
-  const url = new URL(APP_SCRIPT_URL);
-  url.searchParams.append('action', action);
-  Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
-  const response = await fetch(url.toString(), { method });
-  return response.json();
-}
 
 async function refreshPoints() {
   if (!currentUser) return;
@@ -820,6 +860,8 @@ async function init() {
   updateUI();
   checkForCompletedTask();
   setInterval(refreshPoints, 10000);
+  // Load onboarding status from backend
+  await loadOnboardingStatus();
 }
 init();
 

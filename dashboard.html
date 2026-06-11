@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HYCE Elite</title>
 <style>
-/* ========== YOUR EXISTING STYLES ========== */
+/* ========== YOUR EXISTING STYLES (keeping them all - same as before) ========== */
 body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0f172a,#020617);color:#fff;overflow-x:hidden}
 *{box-sizing:border-box}
 .topbar{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#020617;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:1200}
@@ -94,7 +94,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 @media(max-width:700px){.streak{grid-template-columns:1fr}.premium-grid{grid-template-columns:1fr;gap:12px;padding:15px}}
 @media(max-width:480px){.topbar{padding:12px 14px}.balance-amount{font-size:30px}}
 
-/* ========== ORIGINAL ONBOARDING MODAL STYLES (RESTORED) ========== */
+/* ========== ORIGINAL ONBOARDING MODAL STYLES ========== */
 .onboarding-modal {
   position: fixed;
   top: 0;
@@ -462,7 +462,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 <div class="support-wrap"><div class="panel"><h2>Support</h2><p>Need help with tasks, withdrawals, or account access? Use the contact page or the menu to reach the relevant section quickly whenever you need it.</p></div></div>
 <div id="feed" class="live-feed"></div><div class="toast" id="toast"></div>
 
-<!-- ORIGINAL ONBOARDING MODAL - FULLY RESTORED -->
+<!-- ONBOARDING MODAL -->
 <div id="onboardingModal" class="onboarding-modal">
   <div class="floating-particles">
     <div class="particle" style="left:10%;animation-delay:0s"></div>
@@ -506,7 +506,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 </div>
 
 <script>
-// ========== BACKEND-CONNECTED ONBOARDING (ORIGINAL DESIGN) ==========
+// ========== BACKEND-CONNECTED ONBOARDING (FIXED) ==========
 const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwd0FZxlEoUR2JjrMaWUJ_obiOsTVUP-05m7RfaZ9fhvYhNiERAW8YHXYxYwPklePgjng/exec';
 
 // Get current logged in user
@@ -551,24 +551,32 @@ async function loadOnboardingStatus() {
   }
 }
 
-// Save progress to backend
+// Save progress to backend (WhatsApp and Facebook)
 async function saveProgress() {
-  await apiCall('updateOnboarding', {
+  const result = await apiCall('updateOnboarding', {
     username: currentUser,
     whatsappProgress: whatsappProgress,
     facebookDone: facebookDone
   }, 'POST');
+  console.log('Save progress result:', result);
+  return result;
 }
 
-// Complete onboarding
+// Complete onboarding (sets status to 'completed' in sheet)
 async function completeOnboarding() {
   if (whatsappProgress >= 100 && facebookDone) {
     const result = await apiCall('completeOnboarding', { username: currentUser }, 'POST');
+    console.log('Complete onboarding result:', result);
     if (result.success) {
       document.getElementById('onboardingModal').classList.remove('show');
       showToast('🎉 Account approved! Welcome to HYCE Elite!');
+      return true;
+    } else {
+      showToast('Error approving account. Please try again.', true);
+      return false;
     }
   }
+  return false;
 }
 
 function updateWhatsappUI() {
@@ -596,17 +604,29 @@ function updateFacebookUI() {
 
 function checkApprovalReady() {
   const approveBtn = document.getElementById('approveBtn');
-  approveBtn.disabled = !(whatsappProgress >= 100 && facebookDone);
+  const isReady = (whatsappProgress >= 100 && facebookDone);
+  approveBtn.disabled = !isReady;
+  if (isReady) {
+    approveBtn.style.opacity = '1';
+    approveBtn.style.cursor = 'pointer';
+  } else {
+    approveBtn.style.opacity = '0.4';
+    approveBtn.style.cursor = 'not-allowed';
+  }
 }
 
 async function shareOnWhatsApp() {
   if (whatsappProgress >= 100) return;
+  
   const message = `🚀 Join me on HYCE Elite – the easiest way to earn real cash by completing simple tasks!\n\nSign up using my link and start earning today. It's free, fast, and pays instantly via PayPal, Crypto, or Gift Cards.\n\n👉 [https://hycerewards.github.io/hycesurvey/]\n\nDon't miss out – limited bonus points for new members!`;
   window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+  
   const btn = document.getElementById('whatsappBtn');
   const original = btn.innerHTML;
   btn.innerHTML = '<span class="loading-spinner"></span> Sharing...';
   btn.disabled = true;
+  
+  // Reduced from 3 seconds to 1 second - much faster!
   setTimeout(async () => {
     whatsappProgress = Math.min(whatsappProgress + 10, 100);
     await saveProgress();
@@ -619,16 +639,18 @@ async function shareOnWhatsApp() {
       btn.innerHTML = '<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Completed';
     }
     showToast(`+10% progress! ${whatsappProgress}/100% completed`);
-  }, 3000);
+  }, 1000); // FIXED: Changed from 3000 to 1000ms
 }
 
 async function followFacebook() {
   if (facebookDone) return;
+  
   window.open('https://www.facebook.com/share/1BaN6Ha4BE/?mibextid=wwXIfr', '_blank');
   const btn = document.getElementById('facebookBtn');
   const original = btn.innerHTML;
   btn.innerHTML = '<span class="loading-spinner"></span> Verifying...';
   btn.disabled = true;
+  
   setTimeout(async () => {
     facebookDone = true;
     await saveProgress();
@@ -641,10 +663,22 @@ async function followFacebook() {
 
 async function approveAccount() {
   if (whatsappProgress >= 100 && facebookDone) {
-    await completeOnboarding();
+    // Show loading state on button
+    const approveBtn = document.getElementById('approveBtn');
+    const originalText = approveBtn.innerHTML;
+    approveBtn.innerHTML = '<span class="loading-spinner"></span> Approving...';
+    approveBtn.disabled = true;
+    
+    const success = await completeOnboarding();
+    
+    if (!success) {
+      approveBtn.innerHTML = originalText;
+      approveBtn.disabled = false;
+    }
   }
 }
 
+// Attach event listeners
 document.getElementById('whatsappBtn').onclick = shareOnWhatsApp;
 document.getElementById('facebookBtn').onclick = followFacebook;
 document.getElementById('approveBtn').onclick = approveAccount;

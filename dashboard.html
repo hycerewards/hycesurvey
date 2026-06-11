@@ -506,7 +506,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 </div>
 
 <script>
-// ========== BACKEND-INTEGRATED ONBOARDING ==========
+// ========== BACKEND-INTEGRATED ONBOARDING - FIXED VERSION ==========
 // Get current logged in user
 const currentUser = localStorage.getItem('hyce_user');
 const currentPin = localStorage.getItem('hyce_pin');
@@ -517,148 +517,215 @@ if (!currentUser || !currentPin) {
 }
 
 // ========== GOOGLE SHEETS BACKEND ==========
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVHrLbHy1huhVkrgyghjFmoO1exO6n2Q6kTfJHLPo8_0bnxT239qebxqL8BUaWiKdGCQ/exec';
+const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwLRDl3qOYUJdqUvr2hUSKOQQYTeSUqR1NJ_gjh_HfKi2pwHyOHG6vy9Nav-3kUDxoGg/exec';
 
-// API Call function
-async function apiCall(action, params = {}, method = 'POST') {
+// Simple GET-only API call (more reliable)
+async function callAPI(action, params = {}) {
   try {
     const url = new URL(APP_SCRIPT_URL);
     url.searchParams.append('action', action);
+    url.searchParams.append('username', currentUser);
     Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
-    const response = await fetch(url.toString(), { method });
-    return await response.json();
+    
+    console.log(`Calling API: ${action}`, url.toString());
+    const response = await fetch(url.toString(), { method: 'GET' });
+    const result = await response.json();
+    console.log(`API Response ${action}:`, result);
+    return result;
   } catch (err) {
-    console.error('API Error:', err);
+    console.error(`API Error ${action}:`, err);
     return { success: false, error: err.message };
   }
 }
 
-// Onboarding variables
-let whatsappProgress = 0;
-let facebookDone = false;
-let onboardingCompleted = false;
-
 // Load onboarding status from backend
 async function loadOnboardingStatus() {
   try {
-    const result = await apiCall('checkOnboarding', { username: currentUser }, 'GET');
+    const result = await callAPI('checkOnboarding');
     if (result && result.success) {
-      onboardingCompleted = result.onboardingCompleted;
-      whatsappProgress = result.whatsappProgress || 0;
-      facebookDone = result.facebookDone || false;
+      console.log('Onboarding data loaded:', result);
       
-      if (!onboardingCompleted) {
-        document.getElementById('onboardingModal').classList.add('show');
-        updateWhatsappUI();
-        updateFacebookUI();
-        checkApprovalReady();
-      } else {
+      if (result.onboardingCompleted === true) {
+        // User already completed onboarding - hide modal
         document.getElementById('onboardingModal').style.display = 'none';
+        return;
       }
-    } else {
-      // If no data exists (new user with old sheet structure), show modal
+      
+      // Show modal
       document.getElementById('onboardingModal').classList.add('show');
-      updateWhatsappUI();
-      updateFacebookUI();
-      checkApprovalReady();
+      
+      // Update WhatsApp progress
+      const whatsappProgress = result.whatsappProgress || 0;
+      document.getElementById('whatsappProgress').style.width = whatsappProgress + '%';
+      document.getElementById('whatsappStatus').innerHTML = `${whatsappProgress/10}/10`;
+      
+      if (whatsappProgress >= 100) {
+        document.getElementById('whatsappStatus').innerHTML = '✅ Completed';
+        document.getElementById('whatsappStatus').classList.add('completed');
+        document.getElementById('whatsappBtn').disabled = true;
+        document.getElementById('whatsappBtn').innerHTML = '✅ Completed';
+      }
+      
+      // Update Facebook status
+      const facebookDone = result.facebookDone === true;
+      if (facebookDone) {
+        document.getElementById('facebookStatus').innerHTML = '✅ Completed';
+        document.getElementById('facebookStatus').classList.add('completed');
+        document.getElementById('facebookBtn').disabled = true;
+        document.getElementById('facebookBtn').innerHTML = '✅ Followed';
+      }
+      
+      // Check if approve button should be enabled
+      const approveBtn = document.getElementById('approveBtn');
+      approveBtn.disabled = !(whatsappProgress >= 100 && facebookDone);
+      
+    } else {
+      // First time user or error - show modal
+      console.log('First time user or no data, showing modal');
+      document.getElementById('onboardingModal').classList.add('show');
+      document.getElementById('approveBtn').disabled = true;
     }
   } catch (err) {
     console.error('Error loading onboarding status:', err);
-    // Show modal as fallback
     document.getElementById('onboardingModal').classList.add('show');
-    updateWhatsappUI();
-    updateFacebookUI();
-    checkApprovalReady();
+    document.getElementById('approveBtn').disabled = true;
   }
 }
 
-// Save onboarding progress to backend
-async function saveOnboardingProgress() {
-  try {
-    await apiCall('updateOnboarding', {
-      username: currentUser,
-      whatsappProgress: whatsappProgress,
-      facebookDone: facebookDone
-    }, 'POST');
-  } catch (err) {
-    console.error('Error saving onboarding progress:', err);
-  }
+// Save WhatsApp progress
+async function saveWhatsappProgress(progress) {
+  return await callAPI('updateOnboarding', { 
+    whatsappProgress: progress
+  });
 }
 
-function updateWhatsappUI() {
-  const percent = whatsappProgress;
-  document.getElementById('whatsappProgress').style.width = percent + '%';
-  document.getElementById('whatsappStatus').innerHTML = `${percent/10}/10`;
-  if (percent >= 100) {
-    const checkmark = `<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
-    document.getElementById('whatsappStatus').innerHTML = checkmark + 'Completed';
-    document.getElementById('whatsappStatus').classList.add('completed');
-    document.getElementById('whatsappBtn').disabled = true;
-    document.getElementById('whatsappBtn').innerHTML = '<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Completed';
-  }
+// Save Facebook completion
+async function saveFacebookDone() {
+  return await callAPI('updateOnboarding', { 
+    facebookDone: true
+  });
 }
 
-function updateFacebookUI() {
-  if (facebookDone) {
-    const checkmark = `<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
-    document.getElementById('facebookStatus').innerHTML = checkmark + 'Completed';
-    document.getElementById('facebookStatus').classList.add('completed');
-    document.getElementById('facebookBtn').disabled = true;
-    document.getElementById('facebookBtn').innerHTML = '<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Followed';
-  }
-}
-
-function checkApprovalReady() {
-  const approveBtn = document.getElementById('approveBtn');
-  approveBtn.disabled = !(whatsappProgress >= 100 && facebookDone);
-}
-
+// WhatsApp share function
+let isSharing = false;
 async function shareOnWhatsApp() {
-  if (whatsappProgress >= 100) return;
+  if (isSharing) return;
+  
+  // Get current progress first
+  const status = await callAPI('checkOnboarding');
+  if (!status.success) {
+    showToast('Error checking status. Please refresh.', true);
+    return;
+  }
+  
+  let currentProgress = status.whatsappProgress || 0;
+  if (currentProgress >= 100) {
+    showToast('WhatsApp task already completed!');
+    return;
+  }
+  
+  isSharing = true;
+  const btn = document.getElementById('whatsappBtn');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span class="loading-spinner"></span> Opening WhatsApp...';
+  btn.disabled = true;
+  
   const message = `🚀 Join me on HYCE Elite – the easiest way to earn real cash by completing simple tasks!\n\nSign up using my link and start earning today. It's free, fast, and pays instantly via PayPal, Crypto, or Gift Cards.\n\n👉 [https://hycerewards.github.io/hycesurvey/]\n\nDon't miss out – limited bonus points for new members!`;
   window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-  const btn = document.getElementById('whatsappBtn');
-  const original = btn.innerHTML;
-  btn.innerHTML = '<span class="loading-spinner"></span> Sharing...';
-  btn.disabled = true;
+  
   setTimeout(async () => {
-    whatsappProgress = Math.min(whatsappProgress + 10, 100);
-    await saveOnboardingProgress();
-    updateWhatsappUI();
-    checkApprovalReady();
-    btn.innerHTML = original;
-    btn.disabled = false;
-    if (whatsappProgress >= 100) {
-      btn.disabled = true;
-      btn.innerHTML = '<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Completed';
+    const newProgress = Math.min(currentProgress + 10, 100);
+    const saved = await saveWhatsappProgress(newProgress);
+    
+    if (saved && saved.success) {
+      document.getElementById('whatsappProgress').style.width = newProgress + '%';
+      document.getElementById('whatsappStatus').innerHTML = `${newProgress/10}/10`;
+      
+      if (newProgress >= 100) {
+        document.getElementById('whatsappStatus').innerHTML = '✅ Completed';
+        document.getElementById('whatsappStatus').classList.add('completed');
+        btn.innerHTML = '✅ Completed';
+        btn.disabled = true;
+      } else {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+      
+      showToast(`+10% progress! ${newProgress}% completed`);
+      
+      // Check if both tasks are now complete
+      const facebookStatus = document.getElementById('facebookStatus').innerHTML;
+      if (newProgress >= 100 && facebookStatus.includes('Completed')) {
+        document.getElementById('approveBtn').disabled = false;
+      }
+    } else {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      showToast('Error saving progress. Please try again.', true);
     }
-    showToast(`+10% progress! ${whatsappProgress}/100% completed`);
+    
+    isSharing = false;
   }, 3000);
 }
 
+// Facebook follow function
+let isFollowing = false;
 async function followFacebook() {
-  if (facebookDone) return;
-  window.open('https://www.facebook.com/share/1BaN6Ha4BE/?mibextid=wwXIfr', '_blank');
+  if (isFollowing) return;
+  
+  const status = await callAPI('checkOnboarding');
+  if (!status.success) {
+    showToast('Error checking status. Please refresh.', true);
+    return;
+  }
+  
+  if (status.facebookDone === true) {
+    showToast('Facebook task already completed!');
+    return;
+  }
+  
+  isFollowing = true;
   const btn = document.getElementById('facebookBtn');
-  const original = btn.innerHTML;
-  btn.innerHTML = '<span class="loading-spinner"></span> Verifying...';
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span class="loading-spinner"></span> Opening Facebook...';
   btn.disabled = true;
+  
+  window.open('https://www.facebook.com/share/1BaN6Ha4BE/?mibextid=wwXIfr', '_blank');
+  
   setTimeout(async () => {
-    facebookDone = true;
-    await saveOnboardingProgress();
-    updateFacebookUI();
-    checkApprovalReady();
-    btn.innerHTML = original;
-    showToast('✅ Facebook page followed!');
+    const saved = await saveFacebookDone();
+    
+    if (saved && saved.success) {
+      document.getElementById('facebookStatus').innerHTML = '✅ Completed';
+      document.getElementById('facebookStatus').classList.add('completed');
+      btn.innerHTML = '✅ Followed';
+      btn.disabled = true;
+      showToast('✅ Facebook page followed!');
+      
+      // Check if both tasks are now complete
+      const whatsappWidth = document.getElementById('whatsappProgress').style.width;
+      const whatsappText = document.getElementById('whatsappStatus').innerHTML;
+      if (whatsappWidth === '100%' || whatsappText.includes('Completed')) {
+        document.getElementById('approveBtn').disabled = false;
+      }
+    } else {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      showToast('Error saving progress. Please try again.', true);
+    }
+    
+    isFollowing = false;
   }, 2000);
 }
 
+// Approve account - just closes modal, data already saved
 async function approveAccount() {
-  if (whatsappProgress >= 100 && facebookDone) {
-    onboardingCompleted = true;
-    await saveOnboardingProgress();
+  const status = await callAPI('checkOnboarding');
+  if (status && status.success && status.whatsappProgress >= 100 && status.facebookDone === true) {
     document.getElementById('onboardingModal').classList.remove('show');
     showToast('🎉 Account approved! Welcome to HYCE Elite!');
+  } else {
+    showToast('Please complete both tasks first!', true);
   }
 }
 
@@ -672,9 +739,9 @@ let currentPoints = 0;
 
 async function refreshPoints() {
   if (!currentUser) return;
-  const res = await apiCall('getPoints', { username: currentUser }, 'GET');
-  if (res.success) {
-    currentPoints = res.points;
+  const res = await callAPI('getPoints');
+  if (res && res.success) {
+    currentPoints = res.points || 0;
     document.getElementById('balance').innerText = currentPoints;
     document.getElementById('totalPoints').innerText = currentPoints;
     document.getElementById('progressFill').style.width = Math.min((currentPoints / 5000) * 100, 100) + '%';

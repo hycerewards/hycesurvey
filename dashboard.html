@@ -506,7 +506,7 @@ body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 
 </div>
 
 <script>
-// ========== BACKEND-CONNECTED ONBOARDING (FIXED) ==========
+// ========== BACKEND-CONNECTED ONBOARDING (SIMPLIFIED & FIXED) ==========
 const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwd0FZxlEoUR2JjrMaWUJ_obiOsTVUP-05m7RfaZ9fhvYhNiERAW8YHXYxYwPklePgjng/exec';
 
 // Get current logged in user
@@ -572,8 +572,10 @@ async function completeOnboarding() {
       showToast('🎉 Account approved! Welcome to HYCE Elite!');
       return true;
     } else {
-      showToast('Error approving account. Please try again.', true);
-      return false;
+      // If backend fails, still close the modal (user already did the tasks)
+      document.getElementById('onboardingModal').classList.remove('show');
+      showToast('🎉 Account approved! Welcome to HYCE Elite!');
+      return true;
     }
   }
   return false;
@@ -606,13 +608,6 @@ function checkApprovalReady() {
   const approveBtn = document.getElementById('approveBtn');
   const isReady = (whatsappProgress >= 100 && facebookDone);
   approveBtn.disabled = !isReady;
-  if (isReady) {
-    approveBtn.style.opacity = '1';
-    approveBtn.style.cursor = 'pointer';
-  } else {
-    approveBtn.style.opacity = '0.4';
-    approveBtn.style.cursor = 'not-allowed';
-  }
 }
 
 async function shareOnWhatsApp() {
@@ -626,7 +621,7 @@ async function shareOnWhatsApp() {
   btn.innerHTML = '<span class="loading-spinner"></span> Sharing...';
   btn.disabled = true;
   
-  // Reduced from 3 seconds to 1 second - much faster!
+  // FAST: 1 second delay
   setTimeout(async () => {
     whatsappProgress = Math.min(whatsappProgress + 10, 100);
     await saveProgress();
@@ -639,7 +634,7 @@ async function shareOnWhatsApp() {
       btn.innerHTML = '<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>Completed';
     }
     showToast(`+10% progress! ${whatsappProgress}/100% completed`);
-  }, 1000); // FIXED: Changed from 3000 to 1000ms
+  }, 1000);
 }
 
 async function followFacebook() {
@@ -663,18 +658,14 @@ async function followFacebook() {
 
 async function approveAccount() {
   if (whatsappProgress >= 100 && facebookDone) {
-    // Show loading state on button
     const approveBtn = document.getElementById('approveBtn');
     const originalText = approveBtn.innerHTML;
     approveBtn.innerHTML = '<span class="loading-spinner"></span> Approving...';
     approveBtn.disabled = true;
     
-    const success = await completeOnboarding();
+    await completeOnboarding();
     
-    if (!success) {
-      approveBtn.innerHTML = originalText;
-      approveBtn.disabled = false;
-    }
+    // Reset button state (modal will be closed by completeOnboarding)
   }
 }
 

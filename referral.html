@@ -553,7 +553,7 @@ body::before{
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== BACKEND URL ==========
+// ========== BACKEND URL - UPDATE THIS WITH YOUR URL ==========
 const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwd0FZxlEoUR2JjrMaWUJ_obiOsTVUP-05m7RfaZ9fhvYhNiERAW8YHXYxYwPklePgjng/exec';
 
 // Get current user
@@ -578,23 +578,55 @@ async function apiCall(action, params = {}, method = 'POST') {
   }
 }
 
-// ========== AWARD POINTS FUNCTION ==========
+// ========== AWARD POINTS FUNCTION (FIXED) ==========
 async function awardReferralPoints() {
-  const result = await apiCall('addPoints', { 
-    username: currentUser, 
-    points: 100 
-  }, 'POST');
-  
-  if (result.success) {
-    toast('🎉 +100 Points awarded for completing WhatsApp sharing!');
-    // Update dashboard balance if visible
-    if (window.opener) {
-      window.opener.location.reload();
+  try {
+    // Method 1: Try using the apiCall function first
+    const result = await apiCall('addPoints', { 
+      username: currentUser, 
+      points: 100 
+    }, 'POST');
+    
+    if (result.success) {
+      toast('🎉 +100 Points awarded for completing WhatsApp sharing!');
+      return true;
+    } else {
+      // Method 2: Try direct fetch with form data (alternative method)
+      console.log('Trying alternative method...');
+      const formData = new URLSearchParams();
+      formData.append('action', 'addPoints');
+      formData.append('username', currentUser);
+      formData.append('points', 100);
+      
+      const response = await fetch(APP_SCRIPT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
+      });
+      
+      const text = await response.text();
+      let result2;
+      try {
+        result2 = JSON.parse(text);
+      } catch(e) {
+        console.error('Response not JSON:', text);
+        result2 = { success: false, error: 'Invalid server response' };
+      }
+      
+      if (result2.success) {
+        toast('🎉 +100 Points awarded for completing WhatsApp sharing!');
+        return true;
+      } else {
+        console.error('Failed to award points:', result2.error);
+        toast('⚠️ Error awarding points. Please contact support. Error: ' + (result2.error || 'Unknown'), true);
+        return false;
+      }
     }
-    return true;
-  } else {
-    console.error('Failed to award points:', result.error);
-    toast('⚠️ Error awarding points. Please contact support.', true);
+  } catch (err) {
+    console.error('Network error:', err);
+    toast('⚠️ Network error. Please check your connection and try again.', true);
     return false;
   }
 }

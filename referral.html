@@ -371,22 +371,6 @@ body::before{
   box-shadow:none;
   filter:none;
 }
-.btn-task::before{
-  content:'';
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:0;
-  height:0;
-  background:rgba(255,255,255,.2);
-  border-radius:50%;
-  transform:translate(-50%,-50%);
-  transition:width .6s,height .6s;
-}
-.btn-task:active::before{
-  width:300px;
-  height:300px;
-}
 .loading-spinner{
   display:inline-block;
   width:18px;
@@ -553,7 +537,7 @@ body::before{
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== BACKEND URL - UPDATE THIS WITH YOUR URL ==========
+// ========== BACKEND URL - UPDATE WITH YOUR CORRECT URL ==========
 const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwd0FZxlEoUR2JjrMaWUJ_obiOsTVUP-05m7RfaZ9fhvYhNiERAW8YHXYxYwPklePgjng/exec';
 
 // Get current user
@@ -564,69 +548,28 @@ if (!currentUser || !currentPin) {
   window.location.href = 'login.html';
 }
 
-// ========== API CALL FUNCTION ==========
-async function apiCall(action, params = {}, method = 'POST') {
+// ========== SIMPLE API CALL - SAME AS YOUR DASHBOARD ==========
+async function addPoints(points) {
   try {
-    const url = new URL(APP_SCRIPT_URL);
-    url.searchParams.append('action', action);
-    Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
-    const response = await fetch(url.toString(), { method });
-    return await response.json();
-  } catch (err) {
-    console.error('API Error:', err);
-    return { success: false, error: err.message };
-  }
-}
-
-// ========== AWARD POINTS FUNCTION (FIXED) ==========
-async function awardReferralPoints() {
-  try {
-    // Method 1: Try using the apiCall function first
-    const result = await apiCall('addPoints', { 
-      username: currentUser, 
-      points: 100 
-    }, 'POST');
+    const url = `${APP_SCRIPT_URL}?action=addPoints&username=${encodeURIComponent(currentUser)}&points=${points}`;
+    console.log('Calling URL:', url);
+    
+    const response = await fetch(url, { method: 'POST' });
+    const text = await response.text();
+    console.log('Raw response:', text);
+    
+    // Try to parse as JSON
+    const result = JSON.parse(text);
+    console.log('Parsed result:', result);
     
     if (result.success) {
-      toast('🎉 +100 Points awarded for completing WhatsApp sharing!');
       return true;
     } else {
-      // Method 2: Try direct fetch with form data (alternative method)
-      console.log('Trying alternative method...');
-      const formData = new URLSearchParams();
-      formData.append('action', 'addPoints');
-      formData.append('username', currentUser);
-      formData.append('points', 100);
-      
-      const response = await fetch(APP_SCRIPT_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: formData.toString()
-      });
-      
-      const text = await response.text();
-      let result2;
-      try {
-        result2 = JSON.parse(text);
-      } catch(e) {
-        console.error('Response not JSON:', text);
-        result2 = { success: false, error: 'Invalid server response' };
-      }
-      
-      if (result2.success) {
-        toast('🎉 +100 Points awarded for completing WhatsApp sharing!');
-        return true;
-      } else {
-        console.error('Failed to award points:', result2.error);
-        toast('⚠️ Error awarding points. Please contact support. Error: ' + (result2.error || 'Unknown'), true);
-        return false;
-      }
+      console.error('Error from server:', result.error);
+      return false;
     }
   } catch (err) {
-    console.error('Network error:', err);
-    toast('⚠️ Network error. Please check your connection and try again.', true);
+    console.error('Fetch error:', err);
     return false;
   }
 }
@@ -659,8 +602,6 @@ function applyLockedState() {
     btn.innerText = formatRemaining(remaining);
     return true;
   }
-
-  localStorage.removeItem(LOCK_KEY);
   return false;
 }
 
@@ -670,10 +611,10 @@ async function updateWhatsappUI() {
   document.getElementById('whatsappStatus').innerHTML = `${percent/10}/10`;
 
   if (percent >= 100 && !pointsAwarded) {
-    // Award points immediately when reaching 100%
-    const awarded = await awardReferralPoints();
+    // Award points
+    const success = await addPoints(100);
     
-    if (awarded) {
+    if (success) {
       pointsAwarded = true;
       localStorage.setItem(`whatsappPointsAwarded_${currentUser}`, 'true');
       
@@ -684,6 +625,9 @@ async function updateWhatsappUI() {
       const btn = document.getElementById('whatsappBtn');
       btn.disabled = true;
       btn.innerText = '✅ Completed - +100 Points Awarded';
+      toast('🎉 Congratulations! You earned +100 points!');
+    } else {
+      toast('⚠️ Error awarding points. Please try again or contact support.', true);
     }
   } else if (percent >= 100 && pointsAwarded) {
     const checkmark = `<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
@@ -718,14 +662,14 @@ async function shareOnWhatsApp() {
   setTimeout(async () => {
     whatsappProgress = Math.min(whatsappProgress + 10, 100);
     localStorage.setItem(`whatsappProgress_${currentUser}`, whatsappProgress);
-    await updateWhatsappUI();
-
+    
     if (whatsappProgress >= 100) {
       localStorage.setItem(LOCK_KEY, String(Date.now() + LOCK_MS));
-      btn.disabled = true;
-      btn.innerText = '✅ Completed - +100 Points Awarded';
-      toast('🎉 Congratulations! You earned +100 points for completing WhatsApp sharing!');
-    } else {
+    }
+    
+    await updateWhatsappUI();
+
+    if (whatsappProgress < 100) {
       btn.innerHTML = original;
       btn.disabled = false;
       toast(`+10% progress! ${whatsappProgress}/100% completed (${10 - (whatsappProgress/10)} more shares to go!)`);
@@ -740,7 +684,7 @@ function refreshCountdownLabel() {
   if (remaining > 0 && whatsappProgress < 100 && !pointsAwarded) {
     btn.disabled = true;
     btn.innerText = formatRemaining(remaining);
-  } else if (whatsappProgress < 100 && !pointsAwarded) {
+  } else if (whatsappProgress < 100 && !pointsAwarded && !applyLockedState()) {
     btn.disabled = false;
     btn.innerHTML = '📤 Share on WhatsApp';
   }
@@ -755,14 +699,13 @@ function toast(msg, isError = false) {
   window.toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Initialize page
+// Initialize
 function init() {
   document.getElementById('whatsappBtn').onclick = shareOnWhatsApp;
   updateWhatsappUI();
   refreshCountdownLabel();
   setInterval(refreshCountdownLabel, 60000);
 }
-
 init();
 </script>
 </body>

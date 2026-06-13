@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>How to Earn - HYCE Elite</title>
+<style>
+  body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:radial-gradient(circle at top,#0f172a,#020617);
+    color:#fff;
+    overflow-x:hidden;
+  }
+  *{box-sizing:border-box}
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 18px;
+    background:#020617;
+    border-bottom:1px solid #1f2937;
+    position:sticky;
+    top:0;
+    z-index:1000;
+  }
+  .brand{
+    font-weight:800;
+    font-size:16px;
+    letter-spacing:.3px;
+  }
+  .back-btn{
+    color:#fff;
+    text-decoration:none;
+    font-size:14px;
+    padding:10px 14px;
+    border-radius:12px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    transition:.25s ease;
+  }
+  .back-btn:hover{
+    background:rgba(124,58,237,.25);
+    transform:translateY(-1px);
+  }
+  .container{
+    max-width:1100px;
+    margin:0 auto;
+    padding:24px 16px 40px;
+  }
+  .hero{
+    background:linear-gradient(135deg,rgba(17,24,39,.85),rgba(2,6,23,.95));
+    border:1px solid rgba(139,92,246,.22);
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset:-40%;
+    background:radial-gradient(circle,rgba(124,58,237,.18),transparent 35%),
+               radial-gradient(circle at 80% 20%,rgba(34,197,94,.12),transparent 25%);
+    animation:floatGlow 10s ease-in-out infinite alternate;
+    pointer-events:none;
+  }
+  @keyframes floatGlow{
+    from{transform:translate3d(0,0,0)}
+    to{transform:translate3d(24px,-12px,0)}
+  }
+  .hero h1{
+    margin:0 0 10px;
+    font-size:30px;
+    position:relative;
+    z-index:1;
+  }
+  .yt-container{
+    position:relative;
+    padding-top:56.25%;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(139,92,246,.18);
+    box-shadow:0 14px 30px rgba(0,0,0,.28);
+    background:#000;
+    margin-top:16px;
+    position:relative;
+    z-index:1;
+  }
+  .yt-container iframe{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    border:0;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1.2fr .8fr;
+    gap:18px;
+    margin-top:20px;
+  }
+  .card{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.06);
+    border-radius:22px;
+    padding:20px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 24px rgba(0,0,0,.18);
+  }
+  .card h2{
+    margin:0 0 14px;
+    font-size:20px;
+  }
+  .steps{
+    display:grid;
+    gap:12px;
+  }
+  .step{
+    padding:14px;
+    border-radius:16px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.06);
+    transition:.25s ease;
+  }
+  .step:hover{
+    transform:translateY(-2px);
+    border-color:rgba(124,58,237,.28);
+  }
+  .step b{
+    display:block;
+    margin-bottom:6px;
+    color:#fff;
+  }
+  .step span{
+    color:rgba(255,255,255,.74);
+    font-size:13px;
+    line-height:1.55;
+  }
+  .notice{
+    background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(34,197,94,.12));
+    border:1px solid rgba(139,92,246,.22);
+    border-radius:18px;
+    padding:16px;
+    margin-top:14px;
+    line-height:1.6;
+    color:rgba(255,255,255,.82);
+  }
+  .highlight{
+    color:#facc15;
+    font-weight:700;
+  }
+  .cta-row{
+    display:grid;
+    gap:12px;
+    margin-top:14px;
+  }
+  .cta{
+    padding:14px 16px;
+    border-radius:16px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+    color:#fff;
+    text-decoration:none;
+    transition:.25s ease;
+    display:block;
+  }
+  .cta:hover{
+    transform:translateY(-2px);
+    background:rgba(124,58,237,.2);
+    border-color:rgba(124,58,237,.35);
+  }
+  .small{
+    font-size:12px;
+    color:rgba(255,255,255,.62);
+    line-height:1.6;
+  }
+  @media(max-width:900px){
+    .grid{grid-template-columns:1fr}
+    .hero h1{font-size:26px}
+  }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="brand">HYCE Elite</div>
+    <a class="back-btn" href="dashboard.html">Back to Dashboard</a>
+  </div>
+
+  <div class="container">
+    <section class="hero">
+      <h1>How to Earn on HYCE Elite</h1>
+
+      <div class="yt-container">
+        <iframe
+          src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+          title="HYCE Elite Tutorial Video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen>
+        </iframe>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Step-by-Step Guide</h2>
+        <div class="steps">
+          <div class="step">
+            <b>1. Create your account and log in.</b>
+            <span>After signing up, use your login details to access the dashboard and start earning.</span>
+          </div>
+          <div class="step">
+            <b>2. Complete tasks from the dashboard.</b>
+            <span>Open any available task, follow the instructions, wait for the required time, and then verify completion.</span>
+          </div>
+          <div class="step">
+            <b>3. Join the referral page task.</b>
+            <span>New users must complete the referral task on the referral page before they can withdraw earnings.</span>
+          </div>
+          <div class="step">
+            <b>4. Wait for the withdrawal cycle.</b>
+            <span>Payments are made every <span class="highlight">30 days</span> from your sign-up date. Your earnings become eligible based on that schedule.</span>
+          </div>
+          <div class="step">
+            <b>5. Keep earning and stay active.</b>
+            <span>Complete more tasks, maintain your streak, and check the dashboard regularly for updates and new offers.</span>
+          </div>
+        </div>
+
+        <div class="notice">
+          <b>Important:</b> To withdraw, new users must first complete the referral task in the referral page.
+          Also note that payout timing starts counting from your sign-up date, and payments are processed every 30 days.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Quick Rules</h2>
+        <div class="small">
+          • Complete tasks carefully and wait for verification.<br><br>
+          • Use the referral page task as required for withdrawal eligibility.<br><br>
+          • Keep your account active and avoid skipping instructions.<br><br>
+          • Withdrawals are processed on the 30-day cycle from your registration date.
+        </div>
+
+        <div class="cta-row">
+          <a class="cta" href="referral.html">Go to Referral Page</a>
+          <a class="cta" href="dashboard.html">Start Earning Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

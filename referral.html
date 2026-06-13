@@ -537,9 +537,6 @@ body::before{
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== BACKEND URL - UPDATE WITH YOUR CORRECT URL ==========
-const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwd0FZxlEoUR2JjrMaWUJ_obiOsTVUP-05m7RfaZ9fhvYhNiERAW8YHXYxYwPklePgjng/exec';
-
 // Get current user
 const currentUser = localStorage.getItem('hyce_user');
 const currentPin = localStorage.getItem('hyce_pin');
@@ -548,30 +545,26 @@ if (!currentUser || !currentPin) {
   window.location.href = 'login.html';
 }
 
-// ========== SIMPLE API CALL - SAME AS YOUR DASHBOARD ==========
-async function addPoints(points) {
-  try {
-    const url = `${APP_SCRIPT_URL}?action=addPoints&username=${encodeURIComponent(currentUser)}&points=${points}`;
-    console.log('Calling URL:', url);
-    
-    const response = await fetch(url, { method: 'POST' });
-    const text = await response.text();
-    console.log('Raw response:', text);
-    
-    // Try to parse as JSON
-    const result = JSON.parse(text);
-    console.log('Parsed result:', result);
-    
-    if (result.success) {
-      return true;
-    } else {
-      console.error('Error from server:', result.error);
-      return false;
-    }
-  } catch (err) {
-    console.error('Fetch error:', err);
-    return false;
-  }
+// ========== LOCAL STORAGE POINTS SYSTEM ==========
+// Get current points from localStorage (what dashboard uses)
+function getCurrentPoints() {
+  let points = localStorage.getItem(`hyce_points_${currentUser}`);
+  return points ? parseInt(points) : 0;
+}
+
+// Save points to localStorage
+function savePoints(points) {
+  localStorage.setItem(`hyce_points_${currentUser}`, points);
+  // Also update the dashboard balance display if dashboard is open in another tab
+  localStorage.setItem('pointsUpdated', Date.now());
+}
+
+// Add points and update dashboard
+function addPoints(pointsToAdd) {
+  const currentPoints = getCurrentPoints();
+  const newPoints = currentPoints + pointsToAdd;
+  savePoints(newPoints);
+  return newPoints;
 }
 
 // ========== WHATSAPP SHARE PROGRESS ==========
@@ -605,30 +598,26 @@ function applyLockedState() {
   return false;
 }
 
-async function updateWhatsappUI() {
+function updateWhatsappUI() {
   const percent = whatsappProgress;
   document.getElementById('whatsappProgress').style.width = percent + '%';
   document.getElementById('whatsappStatus').innerHTML = `${percent/10}/10`;
 
   if (percent >= 100 && !pointsAwarded) {
-    // Award points
-    const success = await addPoints(100);
+    // Award points locally
+    const newTotal = addPoints(100);
+    pointsAwarded = true;
+    localStorage.setItem(`whatsappPointsAwarded_${currentUser}`, 'true');
     
-    if (success) {
-      pointsAwarded = true;
-      localStorage.setItem(`whatsappPointsAwarded_${currentUser}`, 'true');
-      
-      const checkmark = `<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
-      document.getElementById('whatsappStatus').innerHTML = checkmark + 'Completed +100 Points!';
-      document.getElementById('whatsappStatus').classList.add('completed');
+    const checkmark = `<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+    document.getElementById('whatsappStatus').innerHTML = checkmark + 'Completed +100 Points!';
+    document.getElementById('whatsappStatus').classList.add('completed');
 
-      const btn = document.getElementById('whatsappBtn');
-      btn.disabled = true;
-      btn.innerText = '✅ Completed - +100 Points Awarded';
-      toast('🎉 Congratulations! You earned +100 points!');
-    } else {
-      toast('⚠️ Error awarding points. Please try again or contact support.', true);
-    }
+    const btn = document.getElementById('whatsappBtn');
+    btn.disabled = true;
+    btn.innerText = '✅ Completed - +100 Points Awarded';
+    toast('🎉 Congratulations! You earned +100 points! Your new balance is ' + newTotal + ' points.');
+    
   } else if (percent >= 100 && pointsAwarded) {
     const checkmark = `<svg class="success-checkmark" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
     document.getElementById('whatsappStatus').innerHTML = checkmark + 'Completed +100 Points!';
@@ -646,7 +635,7 @@ async function updateWhatsappUI() {
   }
 }
 
-async function shareOnWhatsApp() {
+function shareOnWhatsApp() {
   if (applyLockedState()) return;
   if (whatsappProgress >= 100 || pointsAwarded) return;
 
@@ -659,7 +648,7 @@ async function shareOnWhatsApp() {
   btn.innerHTML = '<span class="loading-spinner"></span> Sharing...';
   btn.disabled = true;
 
-  setTimeout(async () => {
+  setTimeout(() => {
     whatsappProgress = Math.min(whatsappProgress + 10, 100);
     localStorage.setItem(`whatsappProgress_${currentUser}`, whatsappProgress);
     
@@ -667,7 +656,7 @@ async function shareOnWhatsApp() {
       localStorage.setItem(LOCK_KEY, String(Date.now() + LOCK_MS));
     }
     
-    await updateWhatsappUI();
+    updateWhatsappUI();
 
     if (whatsappProgress < 100) {
       btn.innerHTML = original;

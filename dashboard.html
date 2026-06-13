@@ -139,6 +139,40 @@ if (!currentUser || !currentPin) {
   window.location.href = 'login.html';
 }
 
+// ========== LOCAL STORAGE POINTS SYSTEM (for referral points) ==========
+function getLocalPoints() {
+  let points = localStorage.getItem(`hyce_points_${currentUser}`);
+  return points ? parseInt(points) : 0;
+}
+
+function setLocalPoints(points) {
+  localStorage.setItem(`hyce_points_${currentUser}`, points);
+}
+
+function addLocalPoints(pointsToAdd) {
+  const current = getLocalPoints();
+  const newPoints = current + pointsToAdd;
+  setLocalPoints(newPoints);
+  return newPoints;
+}
+
+// ========== SYNC LOCAL POINTS WITH BACKEND ==========
+async function syncPointsToBackend() {
+  const localPoints = getLocalPoints();
+  if (localPoints > 0) {
+    // Check if backend has these points
+    const res = await apiCall('getPoints', { username: currentUser }, 'GET');
+    if (res.success && res.points < localPoints) {
+      // Backend has fewer points, add the difference
+      const difference = localPoints - res.points;
+      if (difference > 0) {
+        await apiCall('addPoints', { username: currentUser, points: difference }, 'POST');
+        console.log(`Synced ${difference} points to backend`);
+      }
+    }
+  }
+}
+
 // API Call function
 async function apiCall(action, params = {}, method = 'POST') {
   try {
@@ -158,15 +192,46 @@ let currentPoints = 0;
 
 async function refreshPoints() {
   if (!currentUser) return;
+  
+  // First, check localStorage for points (from referral page)
+  const localPoints = getLocalPoints();
+  
+  // Then get from backend
   const res = await apiCall('getPoints', { username: currentUser }, 'GET');
+  
   if (res.success) {
-    currentPoints = res.points;
+    // Use the higher of the two (or combine)
+    let backendPoints = res.points;
+    let finalPoints = Math.max(localPoints, backendPoints);
+    
+    // If localStorage has more points, update backend
+    if (localPoints > backendPoints) {
+      const difference = localPoints - backendPoints;
+      await apiCall('addPoints', { username: currentUser, points: difference }, 'POST');
+      finalPoints = localPoints;
+    }
+    
+    currentPoints = finalPoints;
     document.getElementById('balance').innerText = currentPoints;
     document.getElementById('totalPoints').innerText = currentPoints;
     document.getElementById('progressFill').style.width = Math.min((currentPoints / 5000) * 100, 100) + '%';
     document.getElementById('lastUpdated').innerText = 'Last updated: ' + new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  } else {
+    // If backend fails, show localStorage points
+    currentPoints = localPoints;
+    document.getElementById('balance').innerText = currentPoints;
+    document.getElementById('totalPoints').innerText = currentPoints;
+    document.getElementById('progressFill').style.width = Math.min((currentPoints / 5000) * 100, 100) + '%';
   }
 }
+
+// Listen for localStorage changes (when referral page adds points)
+window.addEventListener('storage', function(e) {
+  if (e.key === `hyce_points_${currentUser}`) {
+    refreshPoints();
+    showToast('Points updated from referral!');
+  }
+});
 
 // ========== TASKS DATA ==========
 const premiumOffers = [
@@ -261,6 +326,10 @@ function checkForCompletedTask() {
       localStorage.setItem('streak', streak);
       localStorage.setItem('lastTaskDate', today);
       showToast(`Task completed! +${taskData.points} points added.`);
+      
+      // Also add points to localStorage
+      addLocalPoints(taskData.points);
+      
       refreshPoints().then(() => updateUI());
     }
     localStorage.removeItem('justCompletedTask');

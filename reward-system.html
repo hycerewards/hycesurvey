@@ -52,24 +52,28 @@ body{font-family:Arial,sans-serif;background:radial-gradient(circle at top,#0f17
   <div class="reward-grid" id="rewardGrid"></div>
   
   <div class="footer-note">
-    ⚡ Redemptions are processed instantly. Points deducted upon successful redemption.
+    ⚡ Redemptions are processed instantly. Points deducted upon successful redemption.<br>
+    💰 Rate: 10,000 points = $25 USD
   </div>
 </div>
 <div class="toast" id="toast">Message</div>
 
 <script>
-// ========== EXACTLY 10 REWARD OPTIONS ==========
+// ========== REWARD OPTIONS - UPDATED RATE: 10,000 points = $25 ==========
+// Calculation: Each 10,000 points = $25
+// So: 10,000 pts = $25 | 20,000 pts = $50 | 30,000 pts = $75, etc.
+
 const rewards = [
-  { id: 1, name: "Starter Cash", points: 10000, cash: 15, desc: "Best for beginners" },
-  { id: 2, name: "Silver Pack", points: 20000, cash: 40, desc: "Popular choice" },
-  { id: 3, name: "Gold Pack", points: 25000, cash: 50, desc: "Great value" },
-  { id: 4, name: "Platinum Pack", points: 30000, cash: 65, desc: "Hot deal" },
-  { id: 5, name: "Ruby Pack", points: 40000, cash: 90, desc: "Big saver" },
-  { id: 6, name: "Sapphire Pack", points: 50000, cash: 115, desc: "Premium" },
-  { id: 7, name: "Emerald Pack", points: 60000, cash: 140, desc: "VIP choice" },
-  { id: 8, name: "Diamond Pack", points: 75000, cash: 180, desc: "Elite" },
-  { id: 9, name: "Master Pack", points: 90000, cash: 220, desc: "Ultimate" },
-  { id: 10, name: "Legend Pack", points: 100000, cash: 250, desc: "Maximum reward" }
+  { id: 1, name: "Starter Cash", points: 10000, cash: 25, desc: "10,000 points = $25" },
+  { id: 2, name: "Silver Pack", points: 20000, cash: 50, desc: "20,000 points = $50" },
+  { id: 3, name: "Gold Pack", points: 25000, cash: 62.50, desc: "25,000 points = $62.50" },
+  { id: 4, name: "Platinum Pack", points: 30000, cash: 75, desc: "30,000 points = $75" },
+  { id: 5, name: "Ruby Pack", points: 40000, cash: 100, desc: "40,000 points = $100" },
+  { id: 6, name: "Sapphire Pack", points: 50000, cash: 125, desc: "50,000 points = $125" },
+  { id: 7, name: "Emerald Pack", points: 60000, cash: 150, desc: "60,000 points = $150" },
+  { id: 8, name: "Diamond Pack", points: 75000, cash: 187.50, desc: "75,000 points = $187.50" },
+  { id: 9, name: "Master Pack", points: 90000, cash: 225, desc: "90,000 points = $225" },
+  { id: 10, name: "Legend Pack", points: 100000, cash: 250, desc: "100,000 points = $250" }
 ];
 
 // ========== USER DATA ==========
@@ -124,7 +128,7 @@ function redeemReward(rewardId) {
     return;
   }
   
-  // Confirm with user (optional but good UX)
+  // Confirm with user
   let confirmMsg = `Redeem ${reward.points.toLocaleString()} points for $${reward.cash}?`;
   if (!confirm(confirmMsg)) return;
   
